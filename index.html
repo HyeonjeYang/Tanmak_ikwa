@@ -9,8 +9,10 @@
   :root { color-scheme:light; --desk:#ddd7c9; --paper:#f5f1e6; --ink:#222327; --pencil:#77736b; --red:#d23b2e; --blue:#2a4fb4; --yellow:#f3d43a; }
   * { box-sizing:border-box; }
   body { margin:0; min-height:100vh; background:var(--desk); color:var(--ink); font:14px/1.6 "Malgun Gothic","Apple SD Gothic Neo",sans-serif; }
-  main { width:min(880px,100%); margin:0 auto; padding:26px 40px 48px; }
-  header { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 14px; margin-bottom:12px; }
+  main { width:min(1160px,100%); margin:0 auto; padding:22px 40px 48px; }
+  /* The sheet grows with the window but always fits on screen; the canvas re-renders at device resolution. */
+  .play { width:min(100%,calc((100vh - 118px) * 8 / 7)); min-width:min(100%,560px); margin:0 auto; }
+  header { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 14px; margin-bottom:10px; }
   .wordmark { font:700 26px/1.2 "Batang","AppleMyungjo",serif; letter-spacing:-.02em; }
   .tagline { color:#55524b; font-size:13px; }
   .version { margin-left:auto; color:var(--pencil); font:11px Consolas,monospace; }
@@ -18,20 +20,23 @@
   canvas { display:block; width:100%; height:100%; outline:none; }
   .overlay { position:absolute; inset:0 25% 0 0; display:flex; align-items:center; justify-content:center; padding:24px 30px; background:#f5f1e6f2; }
   .overlay[hidden] { display:none; }
-  .sheet { position:relative; width:100%; max-width:380px; }
+  .sheet { position:relative; width:100%; max-width:390px; }
   .eyebrow { display:inline-block; margin-bottom:16px; padding:0 8px; border:1px solid var(--ink); font-size:11px; }
   h1 { margin:0 0 10px; font:700 clamp(30px,6vw,44px)/1.15 "Batang","AppleMyungjo",serif; letter-spacing:-.02em; }
   .subtitle { margin:0 0 4px; font:15px/1.6 "Batang","AppleMyungjo",serif; word-break:keep-all; }
-  .description { margin:0 0 16px; color:#4c4943; font-size:12.5px; word-break:keep-all; }
-  .difficulty,.run-mode { display:flex; flex-wrap:wrap; align-items:center; gap:2px 12px; margin-bottom:8px; }
-  .difficulty[hidden],.run-mode[hidden] { display:none; }
+  .description { margin:0 0 14px; color:#4c4943; font-size:12.5px; word-break:keep-all; }
+  .difficulty,.run-mode,.chapter { display:flex; flex-wrap:wrap; align-items:center; gap:2px 12px; margin-bottom:8px; }
+  .difficulty[hidden],.run-mode[hidden],.chapter[hidden] { display:none; }
   .difficulty > span { flex:0 0 100%; color:var(--pencil); font-size:11px; }
-  .run-mode > span { color:var(--pencil); font-size:11px; }
-  .difficulty button,.run-mode button { position:relative; padding:2px 4px; border:0; background:none; color:var(--ink); font:14px "Batang","AppleMyungjo",serif; cursor:pointer; }
+  .run-mode > span,.chapter > span { color:var(--pencil); font-size:11px; }
+  .chapter { gap:2px 7px; }
+  .difficulty button,.run-mode button,.chapter button { position:relative; padding:2px 4px; border:0; background:none; color:var(--ink); font:14px "Batang","AppleMyungjo",serif; cursor:pointer; }
   .run-mode button { font-size:13px; }
+  .chapter button { min-width:20px; font:italic 15px "Cambria Math",Cambria,serif; }
   /* The chosen answer gets circled in red pen, like a marked test. */
-  .difficulty button[aria-pressed="true"]::after,.run-mode button[aria-pressed="true"]::after { content:""; position:absolute; inset:-2px -6px; border:2px solid var(--red); border-radius:50%; transform:rotate(-5deg); pointer-events:none; }
-  .difficulty button:hover,.run-mode button:hover { text-decoration:underline; }
+  .difficulty button[aria-pressed="true"]::after,.run-mode button[aria-pressed="true"]::after,.chapter button[aria-pressed="true"]::after { content:""; position:absolute; inset:-2px -6px; border:2px solid var(--red); border-radius:50%; transform:rotate(-5deg); pointer-events:none; }
+  .chapter button[aria-pressed="true"]::after { inset:-1px -3px; }
+  .difficulty button:hover,.run-mode button:hover,.chapter button:hover { text-decoration:underline; }
   button:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
   #start { margin-top:10px; padding:10px 22px; border:0; background:var(--ink); color:var(--paper); font:700 13px "Malgun Gothic",sans-serif; cursor:pointer; }
   #start:hover { background:var(--red); }
@@ -40,77 +45,97 @@
   .overlay[data-state="clear"] .sheet::after { content:"참 잘했어요"; position:absolute; top:-8px; right:0; display:grid; place-items:center; width:88px; height:88px; border:3px double var(--red); border-radius:50%; color:var(--red); font:700 14px "Batang",serif; transform:rotate(-14deg); opacity:.85; }
   .keys { display:flex; flex-wrap:wrap; gap:6px 18px; margin:14px 0 0; padding:0; list-style:none; color:#45433e; font-size:12px; }
   kbd { margin-right:5px; padding:0 4px; border:1px solid #8d887c; border-bottom-width:2px; background:var(--paper); font:11px Consolas,monospace; }
-  .manual { display:grid; grid-template-columns:1.1fr 1fr; gap:30px; margin-top:30px; }
+  .manual { display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-top:34px; }
   h2 { margin:0 0 8px; font:700 15px "Batang","AppleMyungjo",serif; }
   table { width:100%; border-collapse:collapse; font-size:12px; }
   th,td { padding:5px 6px; border-bottom:1px solid #b9b2a2; text-align:left; vertical-align:top; }
   thead th { border-bottom:1.5px solid var(--ink); }
+  td.u { color:var(--pencil); white-space:nowrap; }
+  .manual td:first-child { white-space:nowrap; }
   .m { font:italic 15px "Cambria Math",Cambria,"Times New Roman",serif; white-space:nowrap; }
   .no { color:var(--red); }
   .manual p,.stages li { color:#4c4943; font-size:12px; word-break:keep-all; }
-  .stages { margin-top:24px; }
-  .stages ol { margin:0; padding-left:20px; }
-  .stages li { margin-bottom:6px; }
+  .stages { margin-top:26px; }
+  .stages ol { margin:0; padding-left:20px; columns:2; column-gap:30px; }
+  .stages li { margin-bottom:6px; break-inside:avoid; }
   footer { margin-top:26px; color:var(--pencil); font-size:11px; }
-  @media(max-width:700px) { main{padding:18px 14px 32px}.manual{grid-template-columns:1fr;gap:22px} }
-  @media(max-width:560px) { .wordmark{font-size:21px}.tagline{font-size:12px}.version{display:none}.overlay{padding:10px 12px}.eyebrow{margin-bottom:6px;font-size:9px}h1{font-size:22px;margin-bottom:4px}.subtitle{font-size:11.5px;line-height:1.45}.description{font-size:10px;line-height:1.45;margin-bottom:8px}.difficulty,.run-mode{margin-bottom:4px;gap:0 8px}.difficulty > span,.run-mode > span{font-size:9.5px}.difficulty button,.run-mode button{font-size:11.5px;padding:1px 3px}#start{margin-top:4px;padding:7px 14px;font-size:11px}.hint{font-size:9px;margin-left:6px}.overlay[data-state="clear"] .sheet::after{width:60px;height:60px;font-size:10px} }
+  @media(max-width:900px) { .manual{grid-template-columns:1fr;gap:22px}.stages ol{columns:1} }
+  @media(max-width:700px) { main{padding:18px 14px 32px} }
+  @media(max-width:560px) { .wordmark{font-size:21px}.tagline{font-size:12px}.version{display:none}.overlay{padding:8px 12px}.eyebrow{margin-bottom:5px;font-size:9px}h1{font-size:22px;margin-bottom:3px}.subtitle{font-size:11.5px;line-height:1.4}.description{font-size:10px;line-height:1.4;margin-bottom:6px}.difficulty,.run-mode,.chapter{margin-bottom:3px;gap:0 8px}.chapter{gap:0 4px}.difficulty > span,.run-mode > span,.chapter > span{font-size:9.5px}.difficulty button,.run-mode button{font-size:11.5px;padding:1px 3px}.chapter button{font-size:12px;padding:0 3px}#start{margin-top:3px;padding:7px 14px;font-size:11px}.hint{font-size:9px;margin-left:6px}.overlay[data-state="clear"] .sheet::after{width:60px;height:60px;font-size:10px} }
 </style>
 </head>
 <body>
 <main>
-  <header><span class="wordmark">수리결계</span><span class="tagline">함수를 미분해서 0으로 만드는 탄막 슈팅</span><span class="version">v2 · 2026.10</span></header>
+  <div class="play">
+  <header><span class="wordmark">수리결계</span><span class="tagline">함수를 0으로 만드는 탄막 슈팅</span><span class="version">v3 · 2026.10</span></header>
   <div class="stage">
-    <canvas id="game" width="800" height="700" tabindex="0" aria-label="수리결계 탄막 게임. 방향키 이동, Shift 저속, Z 발사, C 장비 교체, X 봄, V 정지점, P 일시정지."></canvas>
+    <canvas id="game" width="800" height="700" tabindex="0" aria-label="수리결계 탄막 게임. 방향키 이동, Shift 저속, Z 발사, C 장비 교체, 1부터 7 장비 선택, X 봄, V 정지점, P 일시정지."></canvas>
     <div class="overlay" id="overlay" data-state="title">
       <div class="sheet">
         <div class="eyebrow" id="eyebrow">제1교시 · 탄막 영역</div>
         <h1 id="title">수리결계</h1>
         <p class="subtitle" id="subtitle">화면에 나오는 함수를 모두 0으로 만드시오.</p>
-        <p class="description" id="description">단, d/dx는 차수를 하나씩만 내리고 eˣ는 미분해도 eˣ이다. C로 장비를 바꿔 가며 풀 것.</p>
+        <p class="description" id="description">단, eˣ는 미분해도 eˣ이다. 4단원부터는 단원마다 새 연산자를 하나씩 준다. C로 바꿔 가며 풀 것.</p>
         <div class="difficulty" id="difficulty" role="group" aria-label="난이도 선택"><span id="level-help">난이도 · Easy — 탄이 느리고 적습니다</span><button type="button" data-level="easy" aria-pressed="true">① Easy</button><button type="button" data-level="normal" aria-pressed="false">② Normal</button><button type="button" data-level="hard" aria-pressed="false">③ Hard</button><button type="button" data-level="insane" aria-pressed="false">④ Insane</button></div>
+        <div class="chapter" id="chapter" role="group" aria-label="시작 단원"><span>시작 단원</span><button type="button" data-chapter="0" aria-pressed="true">1</button><button type="button" data-chapter="1" aria-pressed="false">2</button><button type="button" data-chapter="2" aria-pressed="false">3</button><button type="button" data-chapter="3" aria-pressed="false">4</button><button type="button" data-chapter="4" aria-pressed="false">5</button><button type="button" data-chapter="5" aria-pressed="false">6</button><button type="button" data-chapter="6" aria-pressed="false">7</button></div>
         <div class="run-mode" id="run-mode" role="group" aria-label="이어하기 방식"><span>3기를 다 쓰면</span><button type="button" data-runmode="continue" aria-pressed="true">이어하기</button><button type="button" data-runmode="limited" aria-pressed="false">끝내기</button></div>
         <button id="start" type="button">풀기 시작</button><span class="hint" id="hint">Enter 또는 Z</span>
       </div>
     </div>
   </div>
   <ul class="keys" aria-label="조작">
-    <li><kbd>← ↑ ↓ →</kbd>이동</li><li><kbd>Shift</kbd>저속</li><li><kbd>Z</kbd>발사</li><li><kbd>C</kbd>장비 교체</li><li><kbd>1 2 3</kbd>장비 바로 고르기</li><li><kbd>X</kbd>봄 (Q.E.D.)</li><li><kbd>V</kbd>정지점</li><li><kbd>P</kbd>일시정지</li><li><kbd>M</kbd>소리</li>
+    <li><kbd>← ↑ ↓ →</kbd>이동</li><li><kbd>Shift</kbd>저속</li><li><kbd>Z</kbd>발사</li><li><kbd>C</kbd>장비 교체</li><li><kbd>1–7</kbd>장비 바로 고르기</li><li><kbd>X</kbd>봄 (Q.E.D.)</li><li><kbd>V</kbd>정지점</li><li><kbd>P</kbd>일시정지</li><li><kbd>M</kbd>소리</li>
   </ul>
+  </div>
   <section class="manual">
     <div>
       <h2>장비 — 고속과 저속이 다르게 나갑니다</h2>
       <table>
-        <thead><tr><th>장비</th><th>고속</th><th>저속 (Shift)</th></tr></thead>
+        <thead><tr><th>장비</th><th>고속</th><th>저속 (Shift)</th><th></th></tr></thead>
         <tbody>
-          <tr><td><span class="m">d/dx</span> 미분탄</td><td>5갈래로 퍼짐</td><td>3줄로 모아 쏨</td></tr>
-          <tr><td><span class="m">∂/∂y</span> 편미분</td><td>코앞에 짧은 부채꼴</td><td>화면 끝까지 관통 레이저</td></tr>
-          <tr><td><span class="m">∇</span> 기울기</td><td>호밍 빔 8발, 4초마다</td><td>레이저로 찍은 대상에 유도탄</td></tr>
+          <tr><td><span class="m">d/dx</span> 미분탄</td><td>5갈래로 퍼짐</td><td>3줄로 모아 쏨</td><td class="u">처음부터</td></tr>
+          <tr><td><span class="m">∂/∂y</span> 편미분</td><td>코앞에 짧은 부채꼴</td><td>관통 레이저. 과열되면 1.5초 쉼</td><td class="u">처음부터</td></tr>
+          <tr><td><span class="m">∇</span> 기울기</td><td>호밍 빔 8발, 4초마다</td><td>레이저로 찍은 대상에 유도탄</td><td class="u">처음부터</td></tr>
+          <tr><td><span class="m">∮</span> 폐곡선</td><td>직접 움직여 고리를 그림. 닫히면 안쪽에 적용</td><td>내 둘레 반지름 64 원 <span class="m">C</span></td><td class="u">4단원</td></tr>
+          <tr><td><span class="m">A⁻¹</span> 역행렬</td><td>행렬 근처에서도 휘지 않는 탄</td><td>사영 <span class="m">P</span>: 앞쪽 탄의 세로 성분을 지움</td><td class="u">5단원</td></tr>
+          <tr><td><span class="m">ℱ</span> 변환</td><td>1·3·5배음으로 흔들리는 파형탄</td><td>곧게 나가는 단일 주파수</td><td class="u">6단원</td></tr>
+          <tr><td><span class="m">𝔼</span> 기댓값</td><td>몬테카를로 산탄 (무작위)</td><td>표본평균. 오래 쏠수록 모임</td><td class="u">7단원</td></tr>
         </tbody>
       </table>
-      <p>호밍 빔은 너무 편해서 4초 재사용 대기가 있습니다. 기다리는 동안에는 약한 직선탄만 나갑니다. ∂/∂y는 계속 쏘면 과열돼서 1.5초간 못 씁니다.</p>
+      <p>호밍 빔은 4초 재사용 대기가 있습니다. ∮ 고리는 적을 <em>감싸야</em> 효과가 나고, 스칼라 함수에는 <span class="m">∮∇f·dr = 0</span>이라 아무 일도 없습니다. 사영 <span class="m">P</span>는 3초 쓰면 바닥나고 천천히 다시 찹니다.</p>
     </div>
     <div>
       <h2>연산 규칙</h2>
       <table>
-        <thead><tr><th>대상</th><th><span class="m">d/dx</span>, <span class="m">∇</span></th><th><span class="m">∂/∂y</span></th></tr></thead>
+        <thead><tr><th>대상</th><th>통하는 것</th><th>안 통하는 것</th></tr></thead>
         <tbody>
-          <tr><td>다항식 <span class="m">xⁿ</span></td><td>맞을 때마다 차수 하나씩<br><span class="m">x³ → 3x² → 6x → 6 → 0</span></td><td>식 전체를 한 번에 0으로. 빨간 고리가 다 차야 함</td></tr>
-          <tr><td>지수함수 <span class="m">eˣ</span></td><td class="no">안 통함 <span class="m">(d/dx eˣ = eˣ)</span></td><td>0</td></tr>
-          <tr><td>보스</td><td>그대로, eˣ 상태일 때는 <span class="no">안 통함</span></td><td>80%, eˣ 상태일 때 135%</td></tr>
+          <tr><td><span class="m">xⁿ</span></td><td>d/dx로 한 차수씩, ∂/∂y는 한 번에</td><td>∮ <span class="m">(∇f라서 0)</span></td></tr>
+          <tr><td><span class="m">eˣ</span></td><td>∂/∂y만</td><td class="no">나머지 전부</td></tr>
+          <tr><td>벡터장 <span class="m">F</span></td><td>∮로 감싸면 0. 다른 장비는 40%</td><td></td></tr>
+          <tr><td>행렬 <span class="m">A</span></td><td>A⁻¹. 회전·전단은 ∮도</td><td>다른 탄은 근처에서 <span class="m">A</span>로 휨</td></tr>
+          <tr><td><span class="m">sin x</span></td><td>ℱ로 두 δ로 쪼갬, ∂/∂y</td><td>d/dx는 cos로 돌기만 함</td></tr>
+          <tr><td><span class="m">e<sup>−x²</sup></span></td><td>∂/∂y만</td><td class="no">ℱ (고정점), 미분</td></tr>
+          <tr><td><span class="m">1/(s − a)</span></td><td>∮ (유수)</td><td>ℱ를 쓰면 <span class="m">eᵗ</span>가 됨</td></tr>
+          <tr><td><span class="m">Wₜ</span>, <span class="m">Sₜ</span>, Pois</td><td>𝔼. <span class="m">Sₜ</span>는 eˣ로, Pois는 <span class="m">λx</span>로 바뀜</td><td class="no">미분 전부 (미분 불가능)</td></tr>
+          <tr><td>Geo, HG</td><td>맞힐 때마다 시행·뽑기, 𝔼는 상수로</td><td></td></tr>
         </tbody>
       </table>
-      <p>eˣ를 0으로 만드는 방법은 ∂/∂y 하나뿐입니다. 아이템 <span class="m">d²/dx²</span> 이계미분 창도 탄은 지우지만 eˣ에는 안 통하고(<span class="m">d²/dx² eˣ = eˣ</span>), 봄도 eˣ 상태의 보스는 못 깎습니다. <span class="m">∫</span> 방어막은 피탄 한 번을 막습니다.</p>
+      <p>eˣ를 0으로 만드는 방법은 여전히 ∂/∂y 하나뿐입니다. 아이템 <span class="m">d²/dx²</span> 창도 eˣ에는 안 통하고, 봄도 eˣ 상태의 보스는 못 깎습니다.</p>
     </div>
   </section>
   <section class="stages">
-    <h2>스테이지</h2>
+    <h2>단원</h2>
     <ol>
-      <li>필드 「나머지의 격자」 <span class="m">r = n mod 7</span> — 일곱 줄로 내려옵니다. 여섯 마리 중 하나는 eˣ. 보스 「엡실론-델타의 감옥」은 가까운 탄이 느려지고, 몸체 <span class="m">x³ − 3x</span>를 미분할수록 조준탄 갈래가 줄어듭니다.</li>
-      <li>필드 「쌍곡의 통로」 <span class="m">tanh</span> 궤도, 네 마리 중 하나는 eˣ. 보스 「접선의 폭주」는 장미 곡선 <span class="m">r = cos kθ</span>와 접선·법선 레이저를 번갈아 씁니다.</li>
-      <li>필드 「끊기지 않는 파형」 바이어슈트라스 함수, 세 마리 중 하나는 eˣ. 보스 「로렌츠 힘과 오일러 나선」은 12초마다 5초씩 eˣ 상태가 되어 ∂/∂y만 통합니다.</li>
+      <li>「나머지의 격자」 <span class="m">n mod 7</span>. 보스 「엡실론-델타의 감옥」은 가까운 탄이 느려지고, 몸체 <span class="m">x³ − 3x</span>를 미분할수록 조준탄 갈래가 줄어듭니다.</li>
+      <li>「쌍곡의 통로」 <span class="m">tanh</span>. 보스 「접선의 폭주」는 장미 곡선과 접선·법선 레이저를 번갈아 씁니다.</li>
+      <li>「끊기지 않는 파형」 바이어슈트라스 함수. 보스 「로렌츠 힘과 오일러 나선」은 12초마다 5초씩 eˣ가 되어 ∂/∂y만 통합니다.</li>
+      <li>「발산과 회전」 원천·흡수·소용돌이 벡터장. 보스 「발산정리와 스토크스」: 가우스일 때는 감싸기만 하면 되고, 스토크스일 때는 고리가 클수록 많이 깎입니다. 탄은 <span class="m">1/r</span>로 느려지다가 부호가 바뀌면 돌아옵니다.</li>
+      <li>「선형변환」 행렬 적. 보스 「고윳값의 감옥」의 탄은 <span class="m">dx/dt = Ax</span>를 따르고, 보스 근처의 탄은 <span class="m">A</span>로 휩니다. 마지막 4분의 1은 <span class="m">det A = 0</span>입니다.</li>
+      <li>「스펙트럼」 sin, 가우스, 극. 보스 「유수정리」의 극(×)을 ∮로 감싸면 <span class="m">2πi·Res</span>만큼 깎입니다. 유수의 합이 0인 극 둘을 한꺼번에 감싸면 0입니다.</li>
+      <li>「확률과정」 브라운 운동과 분포들. 마지막 보스 「반응-확산」은 화면에 농도 <span class="m">u</span>를 퍼뜨리고, 진한 곳에서 탄이 생깁니다. 샷이 지나간 자리는 옅어집니다.</li>
     </ol>
   </section>
-  <footer>HTML 파일 하나로 돌아갑니다. 외부 파일 없음, 키보드 전용. 최고 점수는 이 브라우저에만 저장됩니다.</footer>
+  <footer>HTML 파일 하나로 돌아갑니다. 외부 파일 없음, 키보드 전용. 화면은 모니터 해상도에 맞춰 다시 그립니다. 최고 점수는 1단원부터 시작했을 때만 이 브라우저에 저장됩니다.</footer>
 </main>
 <script>
 (() => {
@@ -120,24 +145,87 @@
   const overlay = document.getElementById('overlay');
   const ui = Object.fromEntries(['eyebrow','title','subtitle','description','start','hint'].map(id => [id,document.getElementById(id)]));
   const W=600, H=700, TAU=Math.PI*2, STEP=1/60, GRAZE_SHIELD_TARGET=24, HOMING_COOLDOWN=4, OVERHEAT_LOCK=1.5, TRAIL=10;
+  const LOOP_MAX=140, LOOP_MIN_AREA=1200, CIRCLE_R=64, POLE_R=95, GX=30, GY=32, CELL=20, GRID_TOP=60;
   // Ink on graph paper: nothing glows, so every projectile gets an ink outline instead.
-  const C={paper:'#f5f1e6',panel:'#ece6d7',grid:'#d5e0e7',gridBold:'#afc3d2',ink:'#222327',pencil:'#77736b',blue:'#2a4fb4',red:'#d23b2e',green:'#1f7a55',violet:'#6b3ea1',orange:'#d8701a',marker:'#ff7aa8',yellow:'#f3d43a',white:'#ffffff'};
-  const FONTS={sans:'"Malgun Gothic","Apple SD Gothic Neo",sans-serif',mono:'Consolas,monospace',serif:'Batang,"AppleMyungjo",serif',math:'"Cambria Math",Cambria,"Times New Roman",serif'};
-  const OPS=[{sym:'d/dx',name:'미분탄',fast:'5갈래 확산',focus:'3줄 집중'},{sym:'∂/∂y',name:'편미분',fast:'근거리 부채꼴',focus:'관통 레이저'},{sym:'∇',name:'기울기',fast:'호밍 빔',focus:'레이저 유도탄'}];
-  const spells=[
-    {title:'엡실론-델타의 감옥',label:'극한',formula:'lim f(x) = L',sub:'v = v₀·max(.15, (d/δ)²)',hp:2600,duration:65,color:C.green,glyph:'lim',span:2.2,
-      bodies:[['x³ − 3x',x=>x*x*x-3*x],['3x² − 3',x=>3*x*x-3],['6x',x=>6*x],['6',()=>6]]},
-    {title:'접선의 폭주',label:'미분',formula:'f′(x) = dy/dx',sub:'r = cos kθ, k = 4, 5',hp:3200,duration:70,color:C.violet,glyph:'′',span:Math.PI,
-      bodies:[['sin x',Math.sin],['cos x',Math.cos],['−sin x',x=>-Math.sin(x)],['−cos x',x=>-Math.cos(x)]]},
-    {title:'로렌츠 힘과 오일러 나선',label:'초월',formula:'eⁱᶿ = cos θ + i sin θ',sub:'Δθ = q·B·Δt',hp:3800,duration:75,color:C.red,glyph:'e',span:2,
-      bodies:[['eⁱᶿ',Math.cos],['eˣ',Math.exp]]}
+  const C={paper:'#f5f1e6',panel:'#ece6d7',grid:'#d5e0e7',gridBold:'#afc3d2',ink:'#222327',pencil:'#77736b',blue:'#2a4fb4',red:'#d23b2e',green:'#1f7a55',violet:'#6b3ea1',orange:'#d8701a',teal:'#14808a',sepia:'#9a6230',marker:'#ff7aa8',yellow:'#f3d43a',white:'#ffffff'};
+  const FONTS={sans:'"Malgun Gothic","Apple SD Gothic Neo",sans-serif',mono:'Consolas,monospace',serif:'Batang,"AppleMyungjo",serif',math:'"Cambria Math",Cambria,"STIX Two Math","Times New Roman",serif'};
+  // Operators. The lance item counts as d/dx; ∮ only ever arrives through a closed curve or the circle C.
+  const O={D:0,P:1,G:2,LOOP:3,INV:4,FT:5,E:6};
+  const OPS=[
+    {sym:'d/dx',name:'미분탄',fast:'5갈래 확산',focus:'3줄 집중',unlock:0,color:C.blue},
+    {sym:'∂/∂y',name:'편미분',fast:'근거리 부채꼴',focus:'관통 레이저',unlock:0,color:C.red},
+    {sym:'∇',name:'기울기',fast:'호밍 빔',focus:'레이저 유도탄',unlock:0,color:C.green},
+    {sym:'∮',name:'폐곡선',fast:'움직여 고리 긋기',focus:'둘레 원 C',unlock:3,color:C.ink},
+    {sym:'A⁻¹',name:'역행렬',fast:'휘지 않는 탄',focus:'사영 P',unlock:4,color:C.sepia},
+    {sym:'ℱ',name:'변환',fast:'1·3·5배음 파형',focus:'단일 주파수',unlock:5,color:C.teal},
+    {sym:'𝔼',name:'기댓값',fast:'몬테카를로',focus:'표본평균',unlock:6,color:C.violet}
   ];
-  // Each boss is drawn as its own graph; normalise the samples once.
-  for(const s of spells)s.plots=s.bodies.map(([,f])=>{const ys=Array.from({length:49},(_,i)=>f(-s.span+i*s.span/24)),m=Math.max(...ys.map(Math.abs))||1;return ys.map(y=>y/m);});
+  // Enemy kinds. Every kind answers each operator in its own way (see damageEnemy).
+  const K={POLY:0,EXP:1,FIELD:2,MATRIX:3,SIN:4,GAUSS:5,DELTA:6,POLE:7,POIS:8,GEOM:9,HYPER:10,BROWN:11,GBM:12};
+  const BASE_HP=[16,64,40,30,22,60,2,30,1,1,1,1,1];
+  const SPECS={
+    p2:{fn:K.POLY,deg:2},p3:{fn:K.POLY,deg:3},exp:{fn:K.EXP},
+    src:{fn:K.FIELD,a:[1,0,0,1]},sink:{fn:K.FIELD,a:[-1,0,0,-1]},vor:{fn:K.FIELD,a:[0,-1,1,0]},avor:{fn:K.FIELD,a:[0,1,-1,0]},
+    rot:{fn:K.MATRIX,a:[0,-1,1,0]},swap:{fn:K.MATRIX,a:[0,1,1,0]},shear:{fn:K.MATRIX,a:[1,-1.5,0,1]},scale:{fn:K.MATRIX,a:[2,0,0,.5]},
+    sin:{fn:K.SIN},gauss:{fn:K.GAUSS},pole:{fn:K.POLE},pois:{fn:K.POIS},geom:{fn:K.GEOM},hyper:{fn:K.HYPER},brown:{fn:K.BROWN},gbm:{fn:K.GBM}
+  };
+  // Complex bodies write into Z so the Pólya-field bullets never allocate.
+  const Z=[0,0];
+  function cdivInto(a,b,c,d){const q=c*c+d*d||1e-9;Z[0]=(a*c+b*d)/q;Z[1]=(b*c-a*d)/q;}
+  const third=TAU/3;
+  const spells=[
+    {title:'엡실론-델타의 감옥',label:'극한',formula:'lim f(x) = L',sub:'v = v₀·max(.15, (d/δ)²)',hp:2600,duration:65,color:C.green,glyph:'lim',span:2.2,view:'graph',
+      hints:[['x³ − 3x','미분될수록 갈래 ↓'],['가까운 탄','δ = 120 안에서 느려짐']],
+      bodies:[['x³ − 3x',x=>x*x*x-3*x],['3x² − 3',x=>3*x*x-3],['6x',x=>6*x],['6',()=>6]]},
+    {title:'접선의 폭주',label:'미분',formula:'f′(x) = dy/dx',sub:'r = cos kθ, k = 4, 5',hp:3200,duration:70,color:C.violet,glyph:'′',span:Math.PI,view:'graph',
+      hints:[['접선·법선','점선 뒤 0.5초에 발사'],['sin → cos','4분의 1마다 미분']],
+      bodies:[['sin x',Math.sin],['cos x',Math.cos],['−sin x',x=>-Math.sin(x)],['−cos x',x=>-Math.cos(x)]]},
+    {title:'로렌츠 힘과 오일러 나선',label:'초월',formula:'eⁱᶿ = cos θ + i sin θ',sub:'Δθ = q·B·Δt',hp:3800,duration:75,color:C.red,glyph:'e',span:2,view:'graph',
+      hints:[['eˣ 상태','∂/∂y만, 135%'],['± 전하','B 부호대로 휨']],
+      bodies:[['eⁱᶿ',Math.cos],['eˣ',Math.exp]]},
+    {title:'발산정리와 스토크스',label:'벡터해석',formula:'∯ F·n dS = ∭ ∇·F dV',sub:'∮ F·dr = ∬ (∇×F)·n dS',hp:4200,duration:75,color:C.blue,glyph:'∇',view:'field',
+      tip:'벡터장 보스 · ∮(4)로 감싸야 제대로 깎입니다',
+      hints:[['∮ 고리','보스를 감싸기'],['가우스','크기 상관없이 같음'],['스토크스','넓을수록 많이'],['다른 장비','50%']],
+      bodies:[['F = (x, y)',[1,0,0,1]],['F = (−y, x)',[0,-1,1,0]]]},
+    {title:'고윳값의 감옥',label:'선형대수',formula:'dx/dt = A x',sub:'x(t) = eᴬᵗ x₀',hp:4400,duration:75,color:C.sepia,glyph:'λ',view:'matrix',
+      tip:'보스 근처의 탄은 A로 휩니다 · A⁻¹(5)만 곧게 갑니다',
+      hints:[['근처 샷','Ad 방향으로 휨'],['A⁻¹','안 휨, 140%'],['∮','∇×F, ∇·F ≠ 0일 때'],['det A = 0','휘지 않음']],
+      // [label, A, eigenvalues, real eigenvectors as [x, y, λ]] in screen coordinates.
+      bodies:[['A = [.3 −1; 1 .3]',[.3,-1,1,.3],'λ = .3 ± i',null],['A = [.7 0; 0 −.7]',[.7,0,0,-.7],'λ = ±.7 · 안장점',[[1,0,'.7'],[0,1,'−.7']]],
+        ['A = [.35 1; 0 .35]',[.35,1,0,.35],'λ = .35 중근',[[1,0,'.35']]],['A = [.45 .45; .45 .45]',[.45,.45,.45,.45],'λ = .9, 0 · det A = 0',[[1,1,'.9'],[1,-1,'0']]]]},
+    {title:'유수정리',label:'복소해석',formula:'∮ f dz = 2πi Σ Res',sub:'ℒ⁻¹{F}(t) = Σ Res(F·eˢᵗ)',hp:4600,duration:80,color:C.teal,glyph:'z',view:'complex',
+      tip:'극(×)을 ∮로 하나씩 감싸세요 · 유수가 상쇄되면 0입니다',
+      hints:[['극 ×','∮로 2πi·Res'],['Σ Res = 0','같이 감싸면 0'],['몸체','해석적 · 40%']],
+      // [label, f(z) into Z, poles as [x, y, Re Res, Im Res] in units of POLE_R]
+      bodies:[
+        ['1 / (z² + 1)',(x,y)=>cdivInto(1,0,x*x-y*y+1,2*x*y),[[0,1,0,-.5],[0,-1,0,.5]]],
+        ['2z / (z² − 1)',(x,y)=>cdivInto(2*x,2*y,x*x-y*y-1,2*x*y),[[1,0,1,0],[-1,0,1,0]]],
+        ['1 / (z³ − 1)',(x,y)=>cdivInto(1,0,x*x*x-3*x*y*y-1,3*x*x*y-y*y*y),[0,1,2].map(k=>[Math.cos(k*third),Math.sin(k*third),Math.cos(k*third)/3,Math.sin(k*third)/3])],
+        ['eᶻ / z',(x,y)=>{const m=Math.exp(x);cdivInto(m*Math.cos(y),m*Math.sin(y),x,y);},[[0,0,1,0]]]
+      ]},
+    {title:'반응-확산',label:'편미분방정식',formula:'∂u/∂t = DΔu + f(u)',sub:'u > .55인 칸에서 탄이 생김',hp:5200,duration:90,color:C.orange,glyph:'Δ',view:'graph',range:[0,1],
+      tip:'샷이 지나간 칸의 u가 줄어듭니다 · ℱ(6)는 160%',
+      hints:[['진한 u','탄이 생김'],['샷','지나간 칸을 지움'],['∮','감싼 칸 u = 0'],['ℱ','160%']],
+      bodies:[['f = −u/4 (열)',u=>-u/4],['f = u(1 − u) − u/5',u=>u*(1-u)-u/5],['f = u(1 − u)(u − .3)',u=>u*(1-u)*(u-.3)],['f − v ∂u/∂y (이류)',u=>u*(1-u)-u/5]]}
+  ];
+  // Each graph-type boss is drawn as its own graph; normalise the samples once.
+  for(const s of spells){
+    if(s.view!=='graph')continue;
+    const [lo,hi]=s.range||[-s.span,s.span];
+    s.plots=s.bodies.map(([,f])=>{const ys=Array.from({length:49},(_,i)=>f(lo+i*(hi-lo)/48)),m=Math.max(...ys.map(Math.abs))||1;return ys.map(y=>y/m);});
+  }
   const fields=[
-    {title:'나머지의 격자',label:'모듈러',formula:'r = n mod 7',sub:'0, 1, 2, 3, 4, 5, 6',duration:19,color:C.orange,expEvery:6},
-    {title:'쌍곡의 통로',label:'쌍곡함수',formula:'x = ±170 tanh(t/2)',sub:'tanh = sinh / cosh',duration:19,color:C.violet,expEvery:4},
-    {title:'끊기지 않는 파형',label:'바이어슈트라스',formula:'W(x) = Σ aⁿ cos(bⁿπx)',sub:'a = .5, b = 3, n = 0…4',duration:21,color:C.blue,expEvery:3}
+    {title:'나머지의 격자',label:'모듈러',formula:'r = n mod 7',sub:'0, 1, 2, 3, 4, 5, 6',duration:19,color:C.orange,expEvery:6,hints:[['xⁿ','d/dx로 한 차수씩'],['eˣ','∂/∂y만']]},
+    {title:'쌍곡의 통로',label:'쌍곡함수',formula:'x = ±170 tanh(t/2)',sub:'tanh = sinh / cosh',duration:19,color:C.violet,expEvery:4,hints:[['xⁿ','d/dx로 한 차수씩'],['eˣ','∂/∂y만']]},
+    {title:'끊기지 않는 파형',label:'바이어슈트라스',formula:'W(x) = Σ aⁿ cos(bⁿπx)',sub:'a = .5, b = 3, n = 0…4',duration:21,color:C.blue,expEvery:3,hints:[['xⁿ','d/dx로 한 차수씩'],['eˣ','∂/∂y만']]},
+    {title:'발산과 회전',label:'벡터장',formula:'F = A (x, y)ᵀ',sub:'∇·F = tr A,  ∇×F = a₂₁ − a₁₂',duration:22,color:C.blue,
+      roster:['src','vor','p2','sink','avor','p3','vor','exp'],hints:[['∇·F ≠ 0','∮로 감싸면 0'],['∇×F ≠ 0','∮, 다른 장비 40%'],['xⁿ','∮는 0 (∇f)'],['eˣ','∂/∂y만']]},
+    {title:'선형변환',label:'행렬',formula:'T(v) = A v',sub:'det A ≠ 0  ⇔  A⁻¹ 존재',duration:22,color:C.sepia,
+      roster:['rot','p2','swap','shear','p3','scale','exp','rot'],hints:[['[A]','다른 탄은 휨'],['A⁻¹','곧게, 150%'],['회전·전단','∮도 됨'],['[0 1; 1 0]','∮ = 0']]},
+    {title:'스펙트럼',label:'변환',formula:'F(k) = ∫ f(x) e⁻ⁱᵏˣ dx',sub:'ℒ{f}(s) = ∫ f(t) e⁻ˢᵗ dt,  t ≥ 0',duration:22,color:C.teal,
+      roster:['sin','gauss','pole','p3','sin','pole','exp','gauss'],hints:[['sin x','ℱ → δ 둘'],['e⁻ˣ²','ℱ 고정점 · ∂/∂y'],['1/(s − a)','∮만, ℱ면 eᵗ'],['eˣ','∂/∂y만']]},
+    {title:'확률과정',label:'확률',formula:'dX = μ dt + σ dW',sub:'Pois(λ) · Geo(p) · HG(N, K)',duration:24,color:C.red,
+      roster:['pois','brown','geom','hyper','gbm','p3','brown','pois'],hints:[['Wₜ','𝔼[W] = 0'],['Sₜ','𝔼 → eˣ → ∂/∂y'],['Pois','𝔼 → λx → d/dx'],['Geo · HG','맞힐 때마다 시행']]}
   ];
   const difficulties={
     easy:{name:'Easy',speed:.74,density:.68,rate:.8,lives:3,bombs:4,hp:.85,score:1},
@@ -154,33 +242,65 @@
       clear(){this.count=0;}
     };
   }
-  const bullets=makePool(5000,()=>({x:0,y:0,px:0,py:0,angle:0,speed:0,radius:0,kind:0,q:0,age:0,life:0,grazed:false,color:'',length:0}));
+  const bullets=makePool(5000,()=>({x:0,y:0,px:0,py:0,angle:0,speed:0,radius:0,kind:0,q:0,age:0,life:0,grazed:false,color:'',length:0,ox:0,oy:0,proj:false}));
   // Homing beams and missiles keep a ring buffer of past positions to draw their curve.
-  const shots=makePool(500,()=>({x:0,y:0,px:0,py:0,angle:0,speed:0,kind:0,damage:0,age:0,op:0,target:null,tid:0,trail:new Float32Array(TRAIL*2),head:0}));
+  const shots=makePool(500,()=>({x:0,y:0,px:0,py:0,angle:0,speed:0,kind:0,damage:0,age:0,op:0,target:null,tid:0,trail:new Float32Array(TRAIL*2),head:0,ox:0,oy:0,amp:0,freq:0,ph:0,bent:0}));
   const particles=makePool(1200,()=>({x:0,y:0,vx:0,vy:0,life:0,max:0,radius:0,color:''}));
   const warnings=makePool(32,()=>({x:0,y:0,angle:0,age:0,next:0}));
-  const enemies=makePool(40,()=>({x:0,y:0,baseX:0,baseY:0,age:0,hp:0,max:0,fire:0,seed:0,type:0,fn:0,deg:0,coef:1,pd:0,flash:0,immune:0,id:0,alive:false}));
+  const enemies=makePool(40,()=>({x:0,y:0,baseX:0,baseY:0,age:0,hp:0,max:0,fire:0,seed:0,type:0,fn:0,deg:0,coef:1,pd:0,flash:0,immune:0,id:0,alive:false,
+    spec:'',a:new Float32Array(4),phase:0,p:0,lam:0,deck:0,mark:0,trial:0,s:1,jx:0,jy:0,vx:0,path:new Float32Array(24),ph:0,rec:0}));
   const items=makePool(24,()=>({x:0,y:0,age:0,type:0}));
   const labels=makePool(48,()=>({x:0,y:0,text:'',color:'',life:0,max:0}));
-  const player={x:300,y:590,px:300,py:590,invuln:0,focus:false,fire:0,shield:0,shieldTime:0,lance:0,weapon:0,heat:0,overheat:0,homingCd:0,missile:0,beam:0,paint:false,paintY:0,lock:null,lockId:0,lockT:0,lockGrace:0};
+  const player={x:300,y:590,px:300,py:590,invuln:0,focus:false,fire:0,shield:0,shieldTime:0,lance:0,weapon:0,heat:0,overheat:0,homingCd:0,missile:0,beam:0,paint:false,paintY:0,lock:null,lockId:0,lockT:0,lockGrace:0,
+    ring:false,proj:false,pgauge:1,plock:false,eN:0};
   const boss={x:300,y:130,hp:2600,max:2600};
   const keys=new Set();
-  const game={mode:'title',segment:'field',difficulty:'easy',runMode:'continue',continues:0,t:0,phase:0,phaseTime:0,remaining:19,spawn:.7,aimed:1.7,rose:.6,tangent:.5,lives:3,bombs:4,graze:0,integral:0,score:0,high:0,banner:0,transition:0,bomb:0,bombX:0,bombY:0,shake:0,flash:0,B:0,captured:0,phaseClean:true,pattern:'A',fps:60,muted:false,dropTimer:14,itemToast:0,itemName:'',fieldSpawn:0,fieldIndex:0,enemyKills:0,freeze:0,freezeX:0,freezeY:0,freezeCooldown:0,armor:false,bodyIndex:0,bossImmune:0,bossHit:0,expHint:0,expSeen:false};
-  let visualTime=0,accumulator=0,lastTime=0,fpsTime=0,fpsFrames=0,audio=null,enemyId=0;
+  const game={mode:'title',segment:'field',difficulty:'easy',runMode:'continue',continues:0,t:0,phase:0,phaseTime:0,remaining:19,spawn:.7,aimed:1.7,rose:.6,tangent:.5,lives:3,bombs:4,graze:0,integral:0,score:0,high:0,banner:0,transition:0,bomb:0,bombX:0,bombY:0,shake:0,flash:0,B:0,captured:0,phaseClean:true,pattern:'A',fps:60,muted:false,dropTimer:14,itemToast:0,itemName:'',fieldSpawn:0,fieldIndex:0,enemyKills:0,freeze:0,freezeX:0,freezeY:0,freezeCooldown:0,armor:false,bodyIndex:0,bossImmune:0,bossHit:0,expHint:0,expSeen:false,
+    startChapter:0,maxPhase:0,practice:false,newTool:-1,charge:1,spin:1,seed:0,emit:0};
+  // The ∮ pen path, plus a copy of the last closed curve for the highlighter flash.
+  const loop={xs:new Float32Array(LOOP_MAX),ys:new Float32Array(LOOP_MAX),n:0,fx:new Float32Array(LOOP_MAX),fy:new Float32Array(LOOP_MAX),fn:0,flash:0,text:'',cx:0,cy:0};
+  // Concentration u(x, y) for the reaction-diffusion boss, on a 30×32 grid of 20px cells.
+  const conc=new Float32Array(GX*GY),concNext=new Float32Array(GX*GY);
+  let visualTime=0,accumulator=0,lastTime=0,fpsTime=0,fpsFrames=0,audio=null,enemyId=0,scale=1;
   try { game.high=Number(localStorage.getItem('axiom-high')||0)||0; } catch (_) { /* Storage is optional. */ }
-  // Graph paper is static, so it is drawn once and scrolled as a single image.
-  const paper=document.createElement('canvas');paper.width=W;paper.height=H+100;
-  {
-    const g=paper.getContext('2d');g.fillStyle=C.paper;g.fillRect(0,0,W,H+100);
-    for(const [step,color] of [[20,C.grid],[100,C.gridBold]]){
-      g.strokeStyle=color;g.lineWidth=1;g.beginPath();
-      for(let x=.5;x<=W;x+=step){g.moveTo(x,0);g.lineTo(x,H+100);}
-      for(let y=.5;y<=H+100;y+=step){g.moveTo(0,y);g.lineTo(W,y);}
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  const ease=t=>1-Math.pow(1-clamp(t,0,1),3);
+  // Box–Muller; one spare is cached so each call costs a single log and sqrt on average.
+  let spare=null;
+  function gauss(){if(spare!==null){const v=spare;spare=null;return v;}let u=0;while(u===0)u=Math.random();const r=Math.sqrt(-2*Math.log(u)),a=TAU*Math.random();spare=r*Math.sin(a);return r*Math.cos(a);}
+  function poisson(lambda){const limit=Math.exp(-lambda);let k=0,p=Math.random();while(p>limit){k++;p*=Math.random();}return k;}
+  // Tukey-lambda approximation of the normal quantile, good to about 1% for fan spacing.
+  const probit=p=>4.91*(Math.pow(p,.14)-Math.pow(1-p,.14));
+  // Deterministic jitter in (−1, 1) for hand-drawn strokes.
+  const jit=(seed,k)=>(Math.sin(seed*12.9898+k*78.233)*43758.5453)%1;
+  // Graph paper is static, so it is drawn once per resolution and scrolled as a single image.
+  const paper=document.createElement('canvas');
+  function paintPaper(){
+    paper.width=Math.round(W*scale);paper.height=Math.round((H+100)*scale);
+    const g=paper.getContext('2d');g.fillStyle=C.paper;g.fillRect(0,0,paper.width,paper.height);
+    // Sparse pencil fibres so the sheet is not a flat fill; seeded so every resize looks the same.
+    let seed=7;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+    g.fillStyle=C.pencil;
+    for(let i=0,n=paper.width*paper.height/240;i<n;i++){g.globalAlpha=.035+rnd()*.06;g.fillRect(rnd()*paper.width,rnd()*paper.height,1+rnd()*1.6,1);}
+    g.globalAlpha=1;
+    // Rules snap to device pixels so they stay hairline-sharp at any zoom.
+    for(const [step,color,width] of [[20,C.grid,1],[100,C.gridBold,Math.max(1,Math.round(scale))]]){
+      g.strokeStyle=color;g.lineWidth=width;g.beginPath();const off=width%2?.5:0;
+      for(let x=0;x<=W;x+=step){const px=Math.round(x*scale)+off;g.moveTo(px,0);g.lineTo(px,paper.height);}
+      for(let y=0;y<=H+100;y+=step){const py=Math.round(y*scale)+off;g.moveTo(0,py);g.lineTo(paper.width,py);}
       g.stroke();
     }
   }
-  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-  const ease=t=>1-Math.pow(1-clamp(t,0,1),3);
+  // Back the canvas with real device pixels; steps of 1/20 keep the 20px grid on whole pixels.
+  function resize(){
+    const ratio=window.devicePixelRatio||1,css=canvas.clientWidth||800;
+    const next=clamp(Math.round(css/800*ratio*20)/20,1,3);
+    if(next===scale&&canvas.width===Math.round(800*next)&&paper.width)return;
+    scale=next;canvas.width=Math.round(800*scale);canvas.height=Math.round(700*scale);paintPaper();
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  if(typeof ResizeObserver==='function')new ResizeObserver(resize).observe(canvas);
   function text(str,x,y,size=12,color=C.ink,align='left',font='sans',bold=false) {
     ctx.font=`${font==='math'?'italic ':''}${bold?'700 ':''}${size}px ${FONTS[font]}`;
     ctx.textAlign=align;ctx.textBaseline='alphabetic';ctx.fillStyle=color;ctx.fillText(str,x,y);
@@ -188,6 +308,16 @@
   function line(x1,y1,x2,y2,color,width=1){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
   function circle(x,y,r,color,width=1){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();}
   function arrow(x,y,a,color=C.pencil,size=6){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-Math.cos(a-.42)*size,y-Math.sin(a-.42)*size);ctx.lineTo(x-Math.cos(a+.42)*size,y-Math.sin(a+.42)*size);ctx.closePath();ctx.fill();}
+  // A box drawn by hand: each side overshoots its corners a little and no two boxes wobble alike.
+  function sketchRect(x,y,w,h,seed,color=C.ink,width=1.4){
+    const j=k=>jit(seed,k)*1.3;
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();
+    ctx.moveTo(x-2.5+j(1),y+j(2));ctx.lineTo(x+w+2+j(3),y+j(4));
+    ctx.moveTo(x+w+j(5),y-2+j(6));ctx.lineTo(x+w+j(7),y+h+2.5+j(8));
+    ctx.moveTo(x+w+2.5+j(9),y+h+j(10));ctx.lineTo(x-2+j(11),y+h+j(12));
+    ctx.moveTo(x+j(13),y+h+2+j(14));ctx.lineTo(x+j(15),y-2.5+j(16));
+    ctx.stroke();ctx.lineCap='butt';
+  }
   function segmentDistanceSq(x,y,ax,ay,bx,by){
     const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;
     const t=l>0?clamp(((x-ax)*dx+(y-ay)*dy)/l,0,1):0;
@@ -203,21 +333,39 @@
   }
   function note(x,y,str,color=C.ink,life=.9){const l=labels.take();if(!l)return;l.x=clamp(x,40,W-40);l.y=Math.max(76,y);l.text=str;l.color=color;l.life=l.max=life;}
   function bullet(x,y,angle,speed,kind=0,color=C.blue,radius=4,q=0){
-    const b=bullets.take();if(!b)return;
+    const b=bullets.take();if(!b)return null;
     b.x=b.px=x;b.y=b.py=y;b.angle=angle;b.speed=speed*difficulties[game.difficulty].speed;b.kind=kind;b.color=color;b.radius=radius;
-    b.q=q;b.age=0;b.life=kind===0?13:11;b.grazed=false;b.length=kind===2?36:0;
+    b.q=q;b.age=0;b.life=kind===0?13:11;b.grazed=false;b.length=kind===2?36:0;b.ox=x;b.oy=y;b.proj=false;
+    return b;
   }
   function addShot(x,y,angle,speed,kind,damage,op,target=null,tid=0){
     const s=shots.take();if(!s)return null;
-    s.x=s.px=x;s.y=s.py=y;s.angle=angle;s.speed=speed;s.kind=kind;s.damage=damage;s.op=op;s.age=0;s.target=target;s.tid=tid;s.head=0;
+    s.x=s.px=s.ox=x;s.y=s.py=s.oy=y;s.angle=angle;s.speed=speed;s.kind=kind;s.damage=damage;s.op=op;s.age=0;s.target=target;s.tid=tid;s.head=0;s.amp=0;s.freq=0;s.ph=0;s.bent=0;
     for(let i=0;i<s.trail.length;i+=2){s.trail[i]=x;s.trail[i+1]=y;}
     return s;
   }
   const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
   function polyText(coef,deg){return deg===0?String(coef):`${coef===1?'':coef}x${deg>1?SUP[deg]:''}`;}
-  function enemyText(e){return e.fn===1?'eˣ':polyText(e.coef,e.deg);}
-  // What is left to cancel: the current layer plus one full layer per remaining degree.
-  const remainder=e=>e.hp+e.deg*e.max;
+  const SIN_TEXT=['sin x','cos x','−sin x','−cos x'],FIELD_TEXT={src:'F = (x, y)',sink:'F = (−x, −y)',vor:'F = (−y, x)',avor:'F = (y, −x)'};
+  function enemyText(e){
+    switch(e.fn){
+      case K.EXP:return 'eˣ';
+      case K.FIELD:return FIELD_TEXT[e.spec]||'F';
+      case K.SIN:return SIN_TEXT[e.phase];
+      case K.GAUSS:return 'e⁻ˣ²';
+      case K.DELTA:return e.phase?'δ(ω+1)':'δ(ω−1)';
+      case K.POLE:return '1/(s − 1)';
+      case K.POIS:return 'Pois(4)';
+      case K.GEOM:return 'Geo(.15)';
+      case K.HYPER:return 'HG(8, 2)';
+      case K.BROWN:return 'Wₜ';
+      case K.GBM:return `Sₜ = ${e.s.toFixed(1)}`;
+      case K.MATRIX:return 'A';
+      default:return polyText(e.coef,e.deg);
+    }
+  }
+  // What is left to cancel: the current layer plus one full layer per remaining degree (or phase of sin).
+  const remainder=e=>e.hp+(e.fn===K.POLY?e.deg:e.fn===K.SIN?3:0)*e.max;
   function removeEnemy(i){enemies.items[i].alive=false;enemies.remove(i);}
   function resetEnemies(){for(let i=0;i<enemies.count;i++)enemies.items[i].alive=false;enemies.clear();}
   function targetAlive(t,id){return t===boss?game.segment==='boss'&&game.transition<=0&&!game.armor:!!t&&t.alive&&t.id===id;}
@@ -231,43 +379,53 @@
   function enableAudio(){
     try{if(!audio){const AC=window.AudioContext||window.webkitAudioContext;if(AC)audio=new AC();}if(audio&&audio.state==='suspended')audio.resume().catch(()=>{});}catch(_){audio=null;}
   }
-  function saveHigh(){game.high=Math.max(game.high,game.score);try{localStorage.setItem('axiom-high',String(game.high));}catch(_){/* Private browsing works too. */}}
+  // Practice runs that skip ahead are not comparable, so they never touch the record.
+  function saveHigh(){if(game.practice)return;game.high=Math.max(game.high,game.score);try{localStorage.setItem('axiom-high',String(game.high));}catch(_){/* Private browsing works too. */}}
   function showOverlay(eyebrow,title,subtitle,description,buttonLabel,hint){
     ui.eyebrow.textContent=eyebrow;ui.title.textContent=title;ui.subtitle.textContent=subtitle;ui.description.textContent=description;
     ui.start.textContent=buttonLabel;ui.hint.textContent=hint;overlay.dataset.state=game.mode;
-    difficultyChooser.hidden=game.mode==='paused'||game.mode==='continue';runModeChooser.hidden=difficultyChooser.hidden;overlay.hidden=false;
+    difficultyChooser.hidden=game.mode==='paused'||game.mode==='continue';runModeChooser.hidden=chapterChooser.hidden=difficultyChooser.hidden;overlay.hidden=false;
   }
-  const difficultyChooser=document.getElementById('difficulty');
-  difficultyChooser.addEventListener('click',event=>{
-    const button=event.target.closest('button[data-level]');if(!button||game.mode==='playing')return;
-    game.difficulty=button.dataset.level;
-    document.getElementById('level-help').textContent={easy:'난이도 · Easy — 탄이 느리고 적습니다',normal:'난이도 · Normal — 보통',hard:'난이도 · Hard — 빠르고 촘촘합니다',insane:'난이도 · Insane — 많이 어렵습니다'}[game.difficulty];
-    for(const choice of difficultyChooser.querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===button));
+  function chooser(id,attribute,apply){
+    const group=document.getElementById(id);
+    group.addEventListener('click',event=>{
+      const button=event.target.closest(`button[data-${attribute}]`);if(!button||game.mode==='playing')return;
+      apply(button.dataset[attribute]);
+      for(const choice of group.querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===button));
+    });
+    return group;
+  }
+  const difficultyChooser=chooser('difficulty','level',level=>{
+    game.difficulty=level;
+    document.getElementById('level-help').textContent={easy:'난이도 · Easy — 탄이 느리고 적습니다',normal:'난이도 · Normal — 보통',hard:'난이도 · Hard — 빠르고 촘촘합니다',insane:'난이도 · Insane — 많이 어렵습니다'}[level];
   });
-  const runModeChooser=document.getElementById('run-mode');
-  runModeChooser.addEventListener('click',event=>{
-    const button=event.target.closest('button[data-runmode]');if(!button||game.mode==='playing')return;
-    game.runMode=button.dataset.runmode;
-    for(const choice of runModeChooser.querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===button));
-  });
+  const chapterChooser=chooser('chapter','chapter',chapter=>{game.startChapter=Number(chapter);});
+  const runModeChooser=chooser('run-mode','runmode',mode=>{game.runMode=mode;});
+  const available=k=>OPS[k].unlock<=game.maxPhase;
   function start(){
     enableAudio();keys.clear();bullets.clear();shots.clear();particles.clear();warnings.clear();resetEnemies();items.clear();labels.clear();
     const setting=difficulties[game.difficulty];
-    Object.assign(game,{mode:'playing',t:0,phase:0,lives:setting.lives,bombs:setting.bombs,graze:0,integral:0,score:0,bomb:0,shake:0,flash:0,captured:0,continues:0,dropTimer:11+Math.random()*7,itemToast:0,fieldIndex:0,enemyKills:0,freeze:0,freezeCooldown:0,expHint:0,expSeen:false});
-    Object.assign(player,{x:300,y:590,px:300,py:590,invuln:2,focus:false,fire:0,shield:0,shieldTime:0,lance:0,weapon:0,heat:0,overheat:0,homingCd:0,missile:0,beam:0,paint:false,lock:null,lockT:0});
-    beginField(0);overlay.hidden=true;accumulator=0;canvas.focus();
+    Object.assign(game,{mode:'playing',t:0,phase:0,lives:setting.lives,bombs:setting.bombs,graze:0,integral:0,score:0,bomb:0,shake:0,flash:0,captured:0,continues:0,dropTimer:11+Math.random()*7,itemToast:0,fieldIndex:0,enemyKills:0,freeze:0,freezeCooldown:0,expHint:0,expSeen:false,
+      maxPhase:game.startChapter,practice:game.startChapter>0,newTool:-1});
+    Object.assign(player,{x:300,y:590,px:300,py:590,invuln:2,focus:false,fire:0,shield:0,shieldTime:0,lance:0,weapon:0,heat:0,overheat:0,homingCd:0,missile:0,beam:0,paint:false,lock:null,lockT:0,ring:false,proj:false,pgauge:1,plock:false,eN:0});
+    loop.n=0;loop.flash=0;beginField(game.startChapter);overlay.hidden=true;accumulator=0;canvas.focus();
   }
+  function clearStage(){bullets.clear();warnings.clear();shots.clear();resetEnemies();labels.clear();player.lock=null;loop.n=0;loop.flash=0;conc.fill(0);}
   function beginField(index){
     const f=fields[index];
-    Object.assign(game,{segment:'field',phase:index,phaseTime:0,remaining:f.duration,fieldSpawn:.35,fieldIndex:0,enemyKills:0,banner:3.2,transition:.8,pattern:'A',B:0,armor:false,bodyIndex:0});
-    bullets.clear();warnings.clear();shots.clear();resetEnemies();labels.clear();player.lock=null;
-    player.invuln=Math.max(player.invuln,1.4);game.flash=.2;
+    Object.assign(game,{segment:'field',phase:index,phaseTime:0,remaining:f.duration,fieldSpawn:.35,fieldIndex:0,enemyKills:0,banner:3.2,transition:.8,pattern:'A',B:0,armor:false,bodyIndex:0,
+      maxPhase:Math.max(game.maxPhase,index),newTool:index>0?OPS.findIndex(o=>o.unlock===index):-1});
+    clearStage();player.invuln=Math.max(player.invuln,1.4);game.flash=.2;
+    // A new operator arrives with its chapter and is put straight into the player's hand.
+    if(game.newTool>=0){const op=OPS[game.newTool];player.weapon=game.newTool;game.itemToast=4;game.itemName=`새 연산자 ${op.sym} ${op.name} · ${game.newTool+1}번 키`;}
   }
   function beginPhase(index){
     const s=spells[index];
-    Object.assign(game,{segment:'boss',phase:index,phaseTime:0,remaining:s.duration,spawn:1.35,aimed:2.4,rose:1.3,tangent:1.4,banner:3.8,transition:1.25,phaseClean:true,pattern:'A',B:0,armor:false,bodyIndex:0});
-    boss.hp=boss.max=Math.round(s.hp*difficulties[game.difficulty].hp);bullets.clear();warnings.clear();shots.clear();resetEnemies();labels.clear();player.lock=null;
-    player.invuln=Math.max(player.invuln,1.5);game.flash=.25;tone(440+index*110,.6,.06,'sine',880+index*110);
+    Object.assign(game,{segment:'boss',phase:index,phaseTime:0,remaining:s.duration,spawn:1.35,aimed:2.4,rose:1.3,tangent:1.4,banner:3.8,transition:1.25,phaseClean:true,pattern:'A',B:0,armor:false,bodyIndex:0,
+      maxPhase:Math.max(game.maxPhase,index),newTool:-1,charge:1,spin:1,emit:.6,seed:2.2});
+    boss.hp=boss.max=Math.round(s.hp*difficulties[game.difficulty].hp);clearStage();
+    player.invuln=Math.max(player.invuln,1.5);game.flash=.25;tone(440+index*70,.6,.06,'sine',880+index*70);
+    if(s.tip){game.itemToast=4;game.itemName=s.tip;}
   }
   function finishField(){
     if(game.mode!=='playing'||game.segment!=='field')return;
@@ -279,10 +437,11 @@
     game.score+=bullets.count*15+(timeout?10000:30000+Math.floor(game.remaining)*500);
     if(!timeout&&game.phaseClean){game.captured++;game.score+=50000;}
     burst(boss.x,boss.y,spells[game.phase].color,100,230);bullets.clear();warnings.clear();
-    if(game.phase<2){game.bombs=Math.min(difficulties[game.difficulty].bombs,game.bombs+1);beginField(game.phase+1);}
+    if(game.phase<spells.length-1){game.bombs=Math.min(difficulties[game.difficulty].bombs,game.bombs+1);beginField(game.phase+1);}
     else{
       game.mode='clear';saveHigh();tone(660,1.2,.08,'triangle',1320);
-      showOverlay('채점 결과','Q.E.D.','세 문제를 다 풀었습니다.',`점수 ${game.score.toLocaleString()} · 그레이즈 ${game.graze} · 스펠 획득 ${game.captured}/3`,'다시 풀기','Enter 또는 Z');
+      const solved=spells.length-game.startChapter;
+      showOverlay('채점 결과','Q.E.D.',`${solved}문제를 다 풀었습니다.`,`점수 ${game.score.toLocaleString()} · 그레이즈 ${game.graze} · 스펠 획득 ${game.captured}/${solved}${game.practice?' · 연습이라 기록 안 함':''}`,'다시 풀기','Enter 또는 Z');
     }
   }
   function hit(){
@@ -293,7 +452,7 @@
       for(let i=bullets.count-1;i>=0;i--)if(Math.hypot(bullets.items[i].x-player.x,bullets.items[i].y-player.y)<80)bullets.remove(i);
       return;
     }
-    game.lives--;if(game.segment==='boss')game.phaseClean=false;player.invuln=3.2;game.shake=.3;game.flash=.25;
+    game.lives--;if(game.segment==='boss')game.phaseClean=false;player.invuln=3.2;game.shake=.3;game.flash=.25;loop.n=0;
     burst(player.x,player.y,C.red,65,220);tone(200,.45,.1,'sawtooth',35);
     for(let i=bullets.count-1;i>=0;i--)if(Math.hypot(bullets.items[i].x-player.x,bullets.items[i].y-player.y)<95)bullets.remove(i);
     if(game.lives<=0){
@@ -309,7 +468,7 @@
   function continueRun(){
     if(game.mode!=='continue')return;
     game.continues++;game.mode='playing';game.lives=3;game.bombs=Math.max(1,Math.ceil(difficulties[game.difficulty].bombs/2));
-    game.bomb=0;game.freeze=0;player.invuln=3.5;bullets.clear();warnings.clear();resetEnemies();player.lock=null;
+    game.bomb=0;game.freeze=0;player.invuln=3.5;bullets.clear();warnings.clear();resetEnemies();player.lock=null;loop.n=0;
     if(game.segment==='field')game.fieldSpawn=.5;
     overlay.hidden=true;keys.clear();accumulator=0;canvas.focus();
   }
@@ -325,10 +484,14 @@
     for(let i=bullets.count-1;i>=0;i--)if(Math.hypot(bullets.items[i].x-player.x,bullets.items[i].y-player.y)<28)bullets.remove(i);
     burst(player.x,player.y,C.blue,34,105);tone(460,.4,.06,'sine',140);
   }
-  function switchWeapon(to=(player.weapon+1)%3){
-    if(game.mode!=='playing'||to===player.weapon)return;
-    player.weapon=to;player.lock=null;player.lockT=0;player.fire=Math.max(player.fire,.04);
-    note(player.x,player.y-40,OPS[to].sym,C.ink,.6);tone(620+to*140,.07,.025,'square',520+to*140);
+  // C steps through the operators unlocked so far; number keys jump straight to one.
+  function switchWeapon(to){
+    if(game.mode!=='playing')return;
+    if(to===undefined){to=player.weapon;do{to=(to+1)%OPS.length;}while(!available(to));}
+    if(to===player.weapon)return;
+    if(!available(to)){note(player.x,player.y-40,`${OPS[to].sym} · ${OPS[to].unlock+1}단원부터`,C.pencil,.8);return;}
+    player.weapon=to;player.lock=null;player.lockT=0;player.fire=Math.max(player.fire,.04);player.eN=0;loop.n=0;
+    note(player.x,player.y-40,OPS[to].sym,C.ink,.6);tone(620+to*90,.07,.025,'square',520+to*90);
   }
   function pause(){
     if(game.mode==='playing'){
@@ -337,7 +500,7 @@
     }else if(game.mode==='paused'){game.mode='playing';overlay.hidden=true;keys.clear();accumulator=0;canvas.focus();}
   }
   ui.start.addEventListener('click',()=>game.mode==='paused'?pause():game.mode==='continue'?continueRun():start());
-  const controls=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','KeyZ','KeyX','KeyC','KeyV','KeyP','Escape','Enter','KeyM','Digit1','Digit2','Digit3']);
+  const controls=new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','KeyZ','KeyX','KeyC','KeyV','KeyP','Escape','Enter','KeyM','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7']);
   window.addEventListener('keydown',e=>{
     if(controls.has(e.code))e.preventDefault();if(e.repeat)return;
     if(e.code==='KeyM'){enableAudio();game.muted=!game.muted;return;}
@@ -348,67 +511,154 @@
     keys.add(e.code);if(e.code==='KeyX')bomb();
     if(e.code==='KeyC')switchWeapon();
     if(e.code==='KeyV')freezeBullets();
-    if(e.code==='Digit1'||e.code==='Digit2'||e.code==='Digit3')switchWeapon(Number(e.code[5])-1);
+    if(/^Digit[1-7]$/.test(e.code))switchWeapon(Number(e.code[5])-1);
   });
   window.addEventListener('keyup',e=>keys.delete(e.code));
   window.addEventListener('blur',()=>{keys.clear();if(game.mode==='playing')pause();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&game.mode==='playing')pause();lastTime=0;accumulator=0;});
 
-  // Operators: 0 d/dx (and the d²/dx² lance), 1 ∂/∂y, 2 ∇. Returns false when the hit is absorbed.
-  function damageEnemy(i,amount,op){
+  // ∮ acts on a linear field F = A(x, y) through its circulation ∇×F and its flux ∇·F.
+  const curlOf=a=>a[2]-a[1],divOf=a=>a[0]+a[3];
+  const loopable=e=>e.fn===K.POLE||e.fn===K.DELTA||((e.fn===K.FIELD||e.fn===K.MATRIX)&&Math.hypot(curlOf(e.a),divOf(e.a))>1e-6);
+  // Whether an operator can make progress on an enemy at all; homing and the designator skip the rest.
+  function useful(e,op){
+    switch(e.fn){
+      case K.EXP:case K.GAUSS:return op===O.P;
+      case K.BROWN:case K.GBM:case K.POIS:return op===O.E;
+      case K.POLE:return op===O.LOOP;
+      case K.SIN:return op===O.P||op===O.FT;
+      default:return op!==O.LOOP||loopable(e);
+    }
+  }
+  const KILL_SCORE=[700,1400,1100,1100,900,1400,150,1300,1200,1000,1000,1300,1500];
+  function bounce(e,str){
+    if(e.immune>0)return false;
+    e.immune=.5;note(e.x,e.y-24,str,C.red);tone(180,.08,.02,'square',150);return false;
+  }
+  function killEnemy(i,str,color=C.ink){
     const e=enemies.items[i];
-    if(e.fn===1&&op!==1){
-      if(e.immune<=0){
-        e.immune=.5;note(e.x,e.y-24,op===0?'d/dx eˣ = eˣ':'∇eˣ = eˣ',C.red);tone(180,.08,.02,'square',150);
-        if(++game.expHint===3){game.itemToast=3;game.itemName='eˣ는 미분해도 그대로입니다 · C로 ∂/∂y 전환';}
-      }
-      return false;
-    }
-    e.flash=.07;
-    if(op===1)e.pd+=amount;
-    else{
-      e.hp-=amount;game.score+=10;
-      if(e.hp<=0&&e.fn===0&&e.deg>0){
-        // d/dx (a xⁿ) = n a xⁿ⁻¹: each broken layer is one derivative.
-        e.coef*=e.deg;e.deg--;e.hp=e.max;game.score+=150;
-        note(e.x,e.y-24,`→ ${polyText(e.coef,e.deg)}`,C.blue,.8);burst(e.x,e.y,C.blue,6,60);tone(880,.05,.015,'triangle',1100);
-      }
-    }
-    // ∂/∂y of a y-free function is 0 at once; its ring only has to cover what is left.
-    if(e.hp>0&&e.pd<remainder(e))return true;
-    note(e.x,e.y-24,op===1?'∂/∂y = 0':'= 0',op===1?C.red:C.ink,.8);
-    game.score+=Math.round((e.fn===1?1400:700)*difficulties[game.difficulty].score);game.enemyKills++;burst(e.x,e.y,fields[game.phase].color,20,100);
+    if(str)note(e.x,e.y-24,str,color,.8);
+    game.score+=Math.round(KILL_SCORE[e.fn]*difficulties[game.difficulty].score);game.enemyKills++;burst(e.x,e.y,fields[game.phase].color,20,100);
     if(game.dropTimer>6&&items.count===0&&player.shield===0&&player.lance===0&&Math.random()<.1){spawnItem(e.x,e.y);game.dropTimer=18+Math.random()*12;}
     removeEnemy(i);tone(300,.12,.03,'triangle',180);
     return true;
   }
+  // Rewrite an enemy as another kind in place, e.g. 𝔼[Sₜ] into eˣ.
+  function morph(e,fn,deg,coef,str,color){
+    e.fn=fn;e.deg=deg;e.coef=coef;e.pd=0;e.max=e.hp=Math.round(BASE_HP[fn]*difficulties[game.difficulty].hp);e.flash=.15;e.immune=0;
+    note(e.x,e.y-24,str,color,1.1);burst(e.x,e.y,color,10,70);tone(560,.12,.03,'triangle',840);
+  }
+  function drawCard(e){
+    // Sampling without replacement from eight cards, two of them marked.
+    let left=0;for(let c=0;c<8;c++)if(!(e.deck>>c&1))left++;
+    let pick=Math.floor(Math.random()*left);
+    for(let c=0;c<8;c++){if(e.deck>>c&1)continue;if(pick--===0){e.deck|=1<<c;return;}}
+  }
+  const loopText=e=>e.fn===K.POLE?'∮ = 2πi·Res':e.fn===K.DELTA?'∮ δ = 1':Math.abs(curlOf(e.a))>1e-6?'∮F·dr = ∬(∇×F) dA':'∯F·n = ∬(∇·F) dA';
+  // Returns false when the hit is absorbed.
+  function damageEnemy(i,amount,op){
+    const e=enemies.items[i],k=e.fn;
+    // First the identities that make a hit bounce off.
+    if(k===K.EXP&&op!==O.P){
+      if(e.immune<=0&&++game.expHint===3){game.itemToast=3;game.itemName='eˣ는 미분해도 그대로입니다 · C로 ∂/∂y 전환';}
+      return bounce(e,op===O.D?'d/dx eˣ = eˣ':op===O.G?'∇eˣ = eˣ':op===O.LOOP?'∮∇eˣ·dr = 0':op===O.FT?'ℱ{eˣ}는 수렴하지 않음':'eˣ는 ∂/∂y로만');
+    }
+    if(k===K.GAUSS&&op!==O.P)return bounce(e,op===O.FT?'ℱ{e⁻ˣ²}도 가우스':op===O.LOOP?'∮∇f·dr = 0':'미분해도 e⁻ˣ²가 남음');
+    if((k===K.BROWN||k===K.GBM||k===K.POIS)&&op!==O.E)return bounce(e,k===K.BROWN?'Wₜ는 어디서도 미분 불가능':k===K.GBM?'Sₜ: 먼저 𝔼':'이산 확률변수: 먼저 𝔼');
+    if(k===K.POLE&&op!==O.LOOP&&op!==O.FT)return bounce(e,op===O.P?'∂/∂y ≠ 0  (s = x + iy)':'d/ds: 극의 차수만 오름');
+    if(op===O.LOOP&&!loopable(e))return bounce(e,k===K.MATRIX||k===K.FIELD?'∇×F = ∇·F = 0 → ∮ = 0':'∮∇f·dr = 0');
+    if(op===O.FT){
+      if(k===K.SIN){
+        // ℱ{sin x} = iπ[δ(ω+1) − δ(ω−1)]: the card splits into its two spectral lines.
+        for(const side of [-1,1])spawnDelta(e.x+side*14,e.y,side);
+        return killEnemy(i,'ℱ{sin x} → δ(ω ± 1)',C.teal);
+      }
+      if(k===K.POLE){morph(e,K.EXP,0,1,'ℒ⁻¹{1/(s − 1)} = eᵗ',C.red);return true;}
+    }
+    if(op===O.E){
+      if(k===K.BROWN)return killEnemy(i,'𝔼[Wₜ] = 0',C.violet);
+      if(k===K.GBM){morph(e,K.EXP,0,1,'𝔼[Sₜ] = S₀·exp(μt)',C.red);return true;}
+      if(k===K.POIS){morph(e,K.POLY,1,4,'𝔼[Nₜ] = λt',C.blue);return true;}
+      if(k===K.GEOM){morph(e,K.POLY,0,7,'𝔼[X] = 1/p ≈ 7',C.blue);return true;}
+    }
+    if(k===K.GEOM||k===K.HYPER){
+      // Every hit is one trial, at most one per 0.14 s of contact.
+      e.flash=.07;if(e.trial>0)return true;e.trial=.14;
+      if(k===K.GEOM){e.p++;if(Math.random()<.15)return killEnemy(i,`성공 · X = ${e.p}`);note(e.x,e.y-24,'실패',C.pencil,.4);return true;}
+      for(let d=op===O.E?2:1;d>0;d--)drawCard(e);
+      if((e.deck&e.mark)===e.mark){let n=0;for(let c=0;c<8;c++)n+=e.deck>>c&1;return killEnemy(i,`표시 2장 · ${n}번째에`);}
+      return true;
+    }
+    let f=1;
+    if(k===K.FIELD)f=op===O.LOOP?1:.4;
+    else if(k===K.MATRIX)f=op===O.INV?1.5:op===O.P?.5:1;
+    else if((k===K.POLY||k===K.SIN)&&(op===O.INV||op===O.FT||op===O.E))f=.5;
+    amount*=f;e.flash=.07;
+    if(op===O.P)e.pd+=amount;
+    else{
+      e.hp-=amount;game.score+=10;
+      if(e.hp<=0&&k===K.POLY&&e.deg>0){
+        // d/dx (a xⁿ) = n a xⁿ⁻¹: each broken layer is one derivative.
+        e.coef*=e.deg;e.deg--;e.hp=e.max;game.score+=150;
+        note(e.x,e.y-24,`→ ${polyText(e.coef,e.deg)}`,C.blue,.8);burst(e.x,e.y,C.blue,6,60);tone(880,.05,.015,'triangle',1100);
+      }else if(e.hp<=0&&k===K.SIN){
+        // sin → cos → −sin → −cos → sin: differentiation only goes round.
+        e.phase=(e.phase+1)%4;e.hp=e.max;game.score+=50;note(e.x,e.y-24,`→ ${SIN_TEXT[e.phase]}`,C.teal,.8);
+      }
+    }
+    // ∂/∂y of a y-free function is 0 at once; its ring only has to cover what is left.
+    if(e.hp>0&&e.pd<remainder(e))return true;
+      // A closed curve writes one summary of its own, so the cards it clears stay quiet.
+    return killEnemy(i,op===O.P?'∂/∂y = 0':op!==O.LOOP?'= 0':amount<Infinity?loopText(e):'',op===O.P?C.red:C.ink);
+  }
+  // How hard each operator lands on the current boss; ∮ damage is worked out from the curve itself.
+  function bossFactor(op){
+    const p=game.phase;
+    if(p===2&&game.armor)return op===O.P?1.35:0;
+    if(p<3)return op===O.P?.8:1;
+    if(p===3)return op===O.LOOP?1:.5;
+    if(p===4)return op===O.INV?1.4:op===O.P?.6:1;
+    if(p===5)return op===O.LOOP?1:.4;
+    return op===O.FT?1.6:op===O.P?.8:1;
+  }
   function damageBoss(amount,op){
-    if(game.armor&&op!==1){
-      if(game.bossImmune<=0){game.bossImmune=1;note(boss.x,boss.y+64,op===0?'d/dx eˣ = eˣ':'∇eˣ = eˣ',C.red);}
+    const f=bossFactor(op);
+    if(f===0){
+      if(game.bossImmune<=0){game.bossImmune=1;note(boss.x,boss.y+64,op===O.D?'d/dx eˣ = eˣ':op===O.G?'∇eˣ = eˣ':'eˣ는 ∂/∂y로만',C.red);}
       return false;
     }
-    boss.hp=Math.max(0,boss.hp-amount*(op===1?(game.armor?1.35:.8):1));game.score+=op===1?1:10;game.bossHit=.06;
+    if(f<.6&&game.bossImmune<=0){game.bossImmune=2.5;note(boss.x,boss.y+64,game.phase===5?'해석적인 몸체 · 40%':game.phase===4?'∂/∂y · 60%':'벡터장 · 50%',C.pencil,1);}
+    boss.hp=Math.max(0,boss.hp-amount*f);game.score+=op===O.P?1:10;game.bossHit=.06;
     return true;
   }
   function fireShots(dt){
     // Timers may run one tick late for exact cadence, but never bank a burst while another weapon is out.
-    player.fire=Math.max(player.fire-dt,-dt);player.missile=Math.max(player.missile-dt,-dt);player.beam=0;player.paint=false;
-    const firing=keys.has('KeyZ'),partial=firing&&player.weapon===1&&player.lance<=0&&player.overheat<=0;
+    player.fire=Math.max(player.fire-dt,-dt);player.missile=Math.max(player.missile-dt,-dt);player.beam=0;player.paint=false;player.ring=false;player.proj=false;
+    const firing=keys.has('KeyZ'),w=player.lance>0?-1:player.weapon,partial=firing&&w===O.P&&player.overheat<=0;
     if(!partial)player.heat=Math.max(0,player.heat-dt*.55);
-    if(!firing||player.weapon!==2||!player.focus||player.lance>0){player.lock=null;player.lockT=0;}
+    const projecting=firing&&w===O.INV&&player.focus&&!player.plock;
+    if(!projecting)player.pgauge=Math.min(1,player.pgauge+dt*.2);
+    if(player.plock&&player.pgauge>=.35)player.plock=false;
+    if(!firing||w!==O.G||!player.focus){player.lock=null;player.lockT=0;}
+    if(!firing||w!==O.LOOP||player.focus)loop.n=0;
+    if(!firing||w!==O.E||!player.focus)player.eN=0;
     if(!firing){player.fire=Math.max(0,player.fire);player.missile=Math.max(0,player.missile);return;}
-    if(player.lance>0){
-      if(player.fire<=0){player.fire+=.09;addShot(player.x,player.y-20,-Math.PI/2,940,2,24,0);tone(1100,.035,.008,'triangle',750);}
+    if(w<0){
+      if(player.fire<=0){player.fire+=.09;addShot(player.x,player.y-20,-Math.PI/2,940,2,24,O.D);tone(1100,.035,.008,'triangle',750);}
       return;
     }
-    if(player.weapon===0)fireDerivative();
-    else if(player.weapon===1){if(partial)firePartial(dt);}
-    else fireGradient(dt);
+    if(w===O.D)fireDerivative();
+    else if(w===O.P){if(partial)firePartial(dt);}
+    else if(w===O.G)fireGradient(dt);
+    else if(w===O.LOOP){if(player.focus)fireCircle(dt);else traceLoop();}
+    else if(w===O.INV)fireInverse(dt,projecting);
+    else if(w===O.FT)fireTransform();
+    else fireExpectation();
   }
   function fireDerivative(){
     if(player.fire>0)return;
-    if(player.focus){player.fire+=.065;for(const o of [-8,0,8])addShot(player.x+o,player.y-16,-Math.PI/2,920,0,3,0);}
-    else{player.fire+=.075;for(let j=-2;j<=2;j++)addShot(player.x+j*6,player.y-14,-Math.PI/2+j*.11,820,0,2.2,0);}
+    if(player.focus){player.fire+=.065;for(const o of [-8,0,8])addShot(player.x+o,player.y-16,-Math.PI/2,920,0,3,O.D);}
+    else{player.fire+=.075;for(let j=-2;j<=2;j++)addShot(player.x+j*6,player.y-14,-Math.PI/2+j*.11,820,0,2.2,O.D);}
     tone(1100,.035,.008,'triangle',750);
   }
   // Focus fires a straight piercing beam; otherwise a short 230px cone.
@@ -422,22 +672,25 @@
     if(player.heat>=1){player.heat=1;player.overheat=OVERHEAT_LOCK;note(player.x,player.y-36,'과열',C.red,1);tone(140,.3,.05,'sawtooth',70);return;}
     player.beam=player.focus?1:2;
     const dps=player.focus?100:115;
-    if(game.segment==='field'){for(let i=enemies.count-1;i>=0;i--){const e=enemies.items[i];if(inBeam(e.x,e.y,15))damageEnemy(i,dps*dt,1);}}
-    else if(game.transition<=0&&inBeam(boss.x,boss.y,26))damageBoss(dps*dt,1);
+    if(game.segment==='field'){for(let i=enemies.count-1;i>=0;i--){const e=enemies.items[i];if(inBeam(e.x,e.y,15))damageEnemy(i,dps*dt,O.P);}}
+    else if(game.transition<=0){
+      if(inBeam(boss.x,boss.y,26))damageBoss(dps*dt,O.P);
+      if(game.phase===6)for(let c=0;c<GX*GY;c++)if(conc[c]>0&&inBeam((c%GX+.5)*CELL,GRID_TOP+(Math.floor(c/GX)+.5)*CELL,6))conc[c]=Math.max(0,conc[c]-2.4*dt);
+    }
   }
   function fireGradient(dt){
     if(!player.focus){
       if(player.homingCd<=0){
         player.homingCd=HOMING_COOLDOWN;
-        for(let j=0;j<8;j++){const a=-Math.PI/2+(j-3.5)*.32;addShot(player.x+Math.cos(a)*16,player.y+Math.sin(a)*16,a,240,1,15,2);}
+        for(let j=0;j<8;j++){const a=-Math.PI/2+(j-3.5)*.32;addShot(player.x+Math.cos(a)*16,player.y+Math.sin(a)*16,a,240,1,15,O.G);}
         tone(520,.25,.04,'triangle',1040);
       }
-      if(player.fire<=0){player.fire+=.1;for(const side of [-1,1])addShot(player.x+side*7,player.y-14,-Math.PI/2,780,0,1.8,2);}
+      if(player.fire<=0){player.fire+=.1;for(const side of [-1,1])addShot(player.x+side*7,player.y-14,-Math.PI/2,780,0,1.8,O.G);}
       return;
     }
     // Laser designator: paint the nearest ∇-eligible target straight above, then guide missiles to it.
     player.paint=true;let target=null,best=-Infinity;
-    if(game.segment==='field'){for(let i=0;i<enemies.count;i++){const e=enemies.items[i];if(e.fn!==1&&e.y<player.y&&Math.abs(e.x-player.x)<18&&e.y>best){best=e.y;target=e;}}}
+    if(game.segment==='field'){for(let i=0;i<enemies.count;i++){const e=enemies.items[i];if(useful(e,O.G)&&e.y<player.y&&Math.abs(e.x-player.x)<18&&e.y>best){best=e.y;target=e;}}}
     else if(game.transition<=0&&!game.armor&&boss.y<player.y&&Math.abs(boss.x-player.x)<30)target=boss;
     player.paintY=target?target.y:56;
     if(target){
@@ -450,10 +703,149 @@
     }
     if(player.lock&&player.lockT>=1&&player.missile<=0){
       player.missile+=.15;
-      for(const side of [-1,1])addShot(player.x+side*19,player.y,-Math.PI/2+side*.6,320,3,7,2,player.lock,player.lockId);
+      for(const side of [-1,1])addShot(player.x+side*19,player.y,-Math.PI/2+side*.6,320,3,7,O.G,player.lock,player.lockId);
       tone(760,.05,.012,'square',420);
     }
   }
+  // Even-odd test against the pen polygon.
+  function inLoop(x,y,xs,ys,n){
+    let inside=false;
+    for(let a=0,b=n-1;a<n;b=a++)if((ys[a]>y)!==(ys[b]>y)&&x<(xs[b]-xs[a])*(y-ys[a])/(ys[b]-ys[a])+xs[a])inside=!inside;
+    return inside;
+  }
+  // Fast ∮: the pen samples every 7px; coming back within 16px of an older sample closes the curve.
+  function traceLoop(){
+    const n=loop.n;
+    if(n&&Math.hypot(player.x-loop.xs[n-1],player.y-loop.ys[n-1])<7)return;
+    if(n===LOOP_MAX){loop.xs.copyWithin(0,1);loop.ys.copyWithin(0,1);loop.n--;}
+    const last=loop.n++;loop.xs[last]=player.x;loop.ys[last]=player.y;
+    for(let j=0;j<=last-12;j++){
+      if(Math.hypot(loop.xs[j]-player.x,loop.ys[j]-player.y)>=16)continue;
+      let area=0;for(let a=j;a<=last;a++){const b=a===last?j:a+1;area+=loop.xs[a]*loop.ys[b]-loop.xs[b]*loop.ys[a];}
+      area=Math.abs(area)/2;
+      if(area<LOOP_MIN_AREA)return;
+      loop.fx.set(loop.xs.subarray(j,last+1));loop.fy.set(loop.ys.subarray(j,last+1));loop.fn=last-j+1;
+      closeLoop(area);
+      loop.xs[0]=player.x;loop.ys[0]=player.y;loop.n=1;
+      return;
+    }
+  }
+  function closeLoop(area){
+    const xs=loop.fx,ys=loop.fy,n=loop.fn;
+    let cx=0,cy=0;for(let k=0;k<n;k++){cx+=xs[k];cy+=ys[k];}
+    loop.cx=cx/n;loop.cy=cy/n;loop.flash=.7;loop.text='∮ = 0';game.score+=50;tone(700,.18,.04,'triangle',1050);
+    if(game.segment==='field'){
+      // Scalar cards inside are gradient fields, so the curve leaves them alone and says why once.
+      let kills=0,first='',zero='';
+      for(let i=enemies.count-1;i>=0;i--){
+        const e=enemies.items[i];if(!inLoop(e.x,e.y,xs,ys,n))continue;
+        if(loopable(e)){if(!kills)first=loopText(e);damageEnemy(i,Infinity,O.LOOP);kills++;}
+        else if(!zero)zero=e.fn===K.MATRIX||e.fn===K.FIELD?'∇×F = ∇·F = 0 → ∮ = 0':'∮∇f·dr = 0';
+      }
+      if(kills)game.score+=kills*kills*200;
+      loop.text=kills>1?`∮ 한 번에 ${kills}개 = 0`:kills?first:zero||'∮ = 0';
+      if(kills&&zero)loop.text+='\n'+zero;
+    }else if(game.transition<=0)loopBoss(xs,ys,n,area);
+    if(game.segment==='boss'&&game.phase===6)for(let c=0;c<GX*GY;c++)if(conc[c]>0&&inLoop((c%GX+.5)*CELL,GRID_TOP+(Math.floor(c/GX)+.5)*CELL,xs,ys,n))conc[c]=0;
+  }
+  const num=v=>{const a=Math.round(Math.abs(v)*100)/100;return a===.5?'½':a===1?'1':String(a).replace(/^0\./,'.');};
+  const fmtC=(re,im)=>{const r=Math.round(re*100)/100,i=Math.round(im*100)/100;return r&&i?`${r<0?'−':''}${num(r)} ${i<0?'−':'+'} ${num(i)}i`:i?`${i<0?'−':''}${num(i)}i`:`${r<0?'−':''}${num(r)}`;};
+  function loopBoss(xs,ys,n,area){
+    const p=game.phase,inside=inLoop(boss.x,boss.y,xs,ys,n);
+    if(p===5){
+      // Residue theorem: only the poles inside count, and their residues may cancel.
+      let re=0,im=0,count=0;
+      for(let k=0;k<poleCount;k++)if(inLoop(poleXY[k*4],poleXY[k*4+1],xs,ys,n)){re+=poleXY[k*4+2];im+=poleXY[k*4+3];count++;}
+      const m=Math.hypot(re,im);
+      if(count&&m>1e-6){damageBoss(Math.min(900,TAU*m*110),O.LOOP);loop.text=`Σ Res = ${fmtC(re,im)}`;}
+      else loop.text=count?'Σ Res = 0 · 상쇄':inside?'코시: ∮ f dz = 0':'∮ = 0';
+      return;
+    }
+    if(!inside){loop.text='보스를 감싸지 않음';return;}
+    if(p===3){
+      // Gauss: any surface around the source sees the same flux. Stokes: circulation grows with area.
+      const stokes=game.bodyIndex===1;
+      damageBoss(stokes?clamp(area/36,80,560):300,O.LOOP);loop.text=stokes?`∮F·dr = 2·넓이 = ${Math.round(area*2/100)/10}k`:'∯F·n dS = Q · 크기 무관';
+    }else if(p===4){
+      const a=bossMatrix(),m=Math.hypot(curlOf(a),divOf(a));
+      if(m<1e-6){loop.text='∇×F = ∇·F = 0 → ∮ = 0';return;}
+      damageBoss(clamp(area/50,60,300)*Math.min(1.5,m),O.LOOP);loop.text=Math.abs(curlOf(a))>1e-6?'∮ = ∬(∇×F) dA':'∯ = ∬ tr A dA';
+    }else if(p===6){damageBoss(160,O.LOOP);loop.text='∯∇u·n = ∬Δu';}
+    else loop.text='∮∇f·dr = 0';
+  }
+  // Focused ∮: the circle C of radius 64 around the pen integrates whatever sits inside it.
+  function fireCircle(dt){
+    player.ring=true;const r2=CIRCLE_R*CIRCLE_R;
+    if(game.segment==='field'){
+      for(let i=enemies.count-1;i>=0;i--){const e=enemies.items[i];if((e.x-player.x)**2+(e.y-player.y)**2<r2)damageEnemy(i,75*dt*difficulties[game.difficulty].hp,O.LOOP);}
+      return;
+    }
+    if(game.transition>0)return;
+    const p=game.phase,near=(boss.x-player.x)**2+(boss.y-player.y)**2<(CIRCLE_R+18)**2;
+    if(p===5){
+      let re=0,im=0;
+      for(let k=0;k<poleCount;k++)if((poleXY[k*4]-player.x)**2+(poleXY[k*4+1]-player.y)**2<r2){re+=poleXY[k*4+2];im+=poleXY[k*4+3];}
+      const m=Math.hypot(re,im);if(m>1e-6)damageBoss(TAU*m*28*dt,O.LOOP);
+    }else if(near&&p===3)damageBoss(90*dt,O.LOOP);
+    else if(near&&p===4){if(Math.hypot(curlOf(bossMatrix()),divOf(bossMatrix()))>1e-6)damageBoss(70*dt,O.LOOP);}
+    else if(near&&p===6)damageBoss(60*dt,O.LOOP);
+    if(p===6)scrubDisc(player.x,player.y,CIRCLE_R,3*dt);
+  }
+  function fireInverse(dt,projecting){
+    if(player.focus){
+      if(projecting){
+        player.proj=true;player.pgauge=Math.max(0,player.pgauge-dt/3);
+        if(player.pgauge===0){player.plock=true;note(player.x,player.y-36,'P 소진',C.sepia,1);}
+        project();
+      }
+      if(player.fire<=0){player.fire+=.09;for(const side of [-1,1])addShot(player.x+side*6,player.y-14,-Math.PI/2,900,0,1.5,O.INV);}
+      return;
+    }
+    if(player.fire>0)return;
+    player.fire+=.07;for(let j=-1.5;j<=1.5;j++)addShot(player.x+j*5,player.y-14,-Math.PI/2+j*.06,880,0,2.3,O.INV);
+    tone(980,.03,.007,'triangle',700);
+  }
+  // P = [1 0; 0 0]: in the box above the pen, bullets lose their vertical component; straight drops lie in ker P and vanish.
+  function project(){
+    for(let i=bullets.count-1;i>=0;i--){
+      const b=bullets.items[i];
+      if(b.proj||b.kind===2||Math.abs(b.x-player.x)>70||b.y>player.y-6||b.y<player.y-190)continue;
+      const c=Math.cos(b.angle);
+      if(Math.abs(c)<.3){game.score+=20;if(i%2===0)burst(b.x,b.y,C.sepia,2,40);bullets.remove(i);continue;}
+      b.speed=clamp(b.speed*Math.abs(c),30,220);b.angle=c>0?0:Math.PI;b.kind=1;b.proj=true;
+    }
+  }
+  // Fast ℱ: three lanes sway like the 1st, 3rd and 5th harmonics of a square wave.
+  function fireTransform(){
+    if(player.fire>0)return;
+    if(player.focus){player.fire+=.07;for(const o of [-5,5])addShot(player.x+o,player.y-16,-Math.PI/2,940,0,3.3,O.FT);}
+    else{player.fire+=.08;for(const h of [1,3,5]){const s=addShot(player.x,player.y-14,-Math.PI/2,760,4,2.4,O.FT);if(s){s.amp=36/h;s.freq=14*h;}}}
+    tone(1250,.03,.007,'sine',900);
+  }
+  function fireExpectation(){
+    if(player.fire>0)return;
+    if(player.focus){
+      // Law of large numbers: the stream tightens like σ/√n the longer it is held.
+      player.fire+=.07;player.eN++;const spread=.32/Math.sqrt(player.eN);
+      for(let j=0;j<5;j++)addShot(player.x+gauss()*3,player.y-14,-Math.PI/2+gauss()*spread,900,0,1.7,O.E);
+    }else{
+      player.fire+=.085;
+      for(let j=0;j<6;j++)addShot(player.x,player.y-14,-Math.PI/2+(Math.random()-.5)*1.1,620+Math.random()*320,0,1.5,O.E);
+    }
+    tone(900+Math.random()*300,.03,.006,'triangle',700);
+  }
+  // A shot that flies into a matrix's reach leaves along A·d; a null direction is simply lost.
+  function applyMatrix(s,a){
+    const dx=Math.cos(s.angle),dy=Math.sin(s.angle),nx=a[0]*dx+a[1]*dy,ny=a[2]*dx+a[3]*dy,m=Math.hypot(nx,ny);
+    if(m<.05){s.age=99;return;}
+    s.angle=Math.atan2(ny,nx);s.damage*=clamp(m,.25,2);
+  }
+  function bend(s){
+    if(game.segment==='field'){
+      for(let j=0;j<enemies.count;j++){const e=enemies.items[j];if(e.fn===K.MATRIX&&s.bent!==e.id&&(e.x-s.x)**2+(e.y-s.y)**2<44*44){applyMatrix(s,e.a);s.bent=e.id;}}
+    }else if(game.phase===4&&game.transition<=0&&game.bodyIndex<3&&s.bent!==-1&&(boss.x-s.x)**2+(boss.y-s.y)**2<100*100){applyMatrix(s,bossMatrix());s.bent=-1;}
+  }
+  const bossMatrix=()=>spells[4].bodies[game.bodyIndex][1];
   // W(x) = Σ a^n cos(b^n πx), a = 1/2, b = 3, n = 0…4.
   function weierstrass(x){let sum=0,amplitude=1,frequency=1;for(let n=0;n<5;n++){sum+=amplitude*Math.cos(frequency*Math.PI*x);amplitude*=.5;frequency*=3;}return sum;}
   function spawnItem(x,y,type=Math.random()<.5?0:1){
@@ -483,106 +875,272 @@
       if(item.y>H+30||item.age>14)items.remove(i);
     }
   }
+  function resetEnemy(e,x,y){
+    e.x=e.baseX=x;e.y=e.baseY=y;e.age=0;e.fire=.75;e.flash=0;e.immune=0;e.pd=0;e.alive=true;e.id=++enemyId;e.type=game.phase;
+    e.deg=0;e.coef=1;e.phase=0;e.p=0;e.deck=0;e.mark=0;e.trial=0;e.s=1;e.jx=0;e.jy=0;e.vx=0;e.ph=0;e.rec=0;e.spec='';e.a.fill(0);
+    for(let k=0;k<e.path.length;k+=2){e.path[k]=x;e.path[k+1]=y;}
+  }
+  function spawnDelta(x,y,side){
+    const e=enemies.take();if(!e)return;
+    resetEnemy(e,x,y);e.fn=K.DELTA;e.vx=side*70;e.phase=side>0?1:0;e.max=e.hp=BASE_HP[K.DELTA];e.fire=99;
+  }
   function spawnFieldEnemy(){
     const e=enemies.take();if(!e)return;
     const n=game.fieldIndex++,type=game.phase,f=fields[type];
-    e.type=type;e.seed=n;e.age=0;e.fire=.75;e.baseY=-24;e.y=-24;e.flash=0;e.immune=0;e.pd=0;e.alive=true;e.id=++enemyId;
-    e.baseX=type===0?55+(n%7)*81:type===1?300:300+(n%3-1)*45;e.x=e.baseX;
-    // Every k-th arrival is eˣ; the rest are monomials whose degree rises with the stage.
-    e.fn=n%f.expEvery===f.expEvery-2?1:0;e.deg=e.fn?0:1+type+n%2;e.coef=1;
-    e.max=e.hp=Math.round((e.fn?64:16)*difficulties[game.difficulty].hp);
-    if(e.fn&&!game.expSeen){game.expSeen=true;game.itemToast=3.2;game.itemName='eˣ 등장 · d/dx로는 줄지 않습니다. C → ∂/∂y';}
+    const x=type===0?55+(n%7)*81:type===1?300:type===2?300+(n%3-1)*45:type===3?110+(n%5)*95:type===4?120+(n%4)*120:type===5?100+(n*137)%400:90+(n*211)%420;
+    resetEnemy(e,x,-24);e.seed=n;
+    if(type<3){
+      // Every k-th arrival is eˣ; the rest are monomials whose degree rises with the stage.
+      e.fn=n%f.expEvery===f.expEvery-2?1:0;e.deg=e.fn?0:1+type+n%2;
+    }else{
+      const name=f.roster[n%f.roster.length],spec=SPECS[name];
+      e.spec=name;e.fn=spec.fn;e.deg=spec.deg||0;if(spec.a)e.a.set(spec.a);
+      if(e.fn===K.HYPER){const a=Math.floor(Math.random()*8);let b=Math.floor(Math.random()*7);if(b>=a)b++;e.mark=1<<a|1<<b;}
+      if(e.fn===K.POIS)e.fire=.4+Math.random();
+    }
+    e.max=e.hp=Math.round(BASE_HP[e.fn]*difficulties[game.difficulty].hp);
+    if(e.fn===K.EXP&&!game.expSeen){game.expSeen=true;game.itemToast=3.2;game.itemName='eˣ 등장 · d/dx로는 줄지 않습니다. C → ∂/∂y';}
+  }
+  function moveEnemy(e,dt){
+    if(e.fn===K.DELTA){e.baseX+=e.vx*dt;e.vx*=1-dt*.8;e.x=e.baseX;e.y=e.baseY+e.age*50;return;}
+    e.y=e.baseY+e.age*(e.type>=3?40:44);
+    switch(e.type){
+      case 0:e.x=e.baseX+20*Math.sin(e.age*2+e.seed);break;
+      case 1:e.x=300+(e.seed%2?1:-1)*170*Math.tanh(e.age*.5);break;
+      case 2:e.x=e.baseX+65*weierstrass(e.age*.18+e.seed*.31);break;
+      case 3:e.x=e.baseX+55*Math.sin(e.age*.8+e.seed);break;
+      case 4:e.x=e.baseX+40*Math.sin(e.age*.6+e.seed);break;
+      case 5:e.x=e.baseX+70*Math.sin(e.age*1.3+e.seed);break;
+      default:{
+        // Ornstein–Uhlenbeck wander: a Brownian kick each tick, pulled back toward the lane.
+        const sigma=e.fn===K.BROWN||e.fn===K.GBM?80:14,root=Math.sqrt(dt);
+        e.jx+=-1.5*e.jx*dt+sigma*root*gauss();e.jy+=-1.5*e.jy*dt+sigma*root*gauss();
+        e.x=e.baseX+e.jx;e.y+=e.jy;
+      }
+    }
+    if(e.fn===K.GBM)e.s=clamp(e.s*Math.exp((.15-.08)*dt+.4*Math.sqrt(dt)*gauss()),.4,8);
+    e.rec-=dt;if(e.rec<=0){e.rec=.06;e.ph=(e.ph+2)%e.path.length;e.path[e.ph]=e.x;e.path[e.ph+1]=e.y;}
+  }
+  function fireEnemy(e,setting){
+    const aim=Math.atan2(player.y-e.y,player.x-e.x),d=setting.density,r=setting.rate;
+    switch(e.fn){
+      case K.EXP:{
+        // eˣ reloads faster the longer it lives, and its bullets accelerate exponentially.
+        e.fire+=Math.max(.5,1.6*Math.exp(-.1*e.age))/r;
+        const count=Math.max(3,Math.round(5*d));
+        for(let j=0;j<count;j++)bullet(e.x,e.y+10,aim+(j-(count-1)/2)*.2,45,4,C.red,4);
+        return;
+      }
+      case K.FIELD:{
+        e.fire+=1.75/r;const div=divOf(e.a),curl=curlOf(e.a),count=Math.max(6,Math.round(10*d));
+        for(let j=0;j<count;j++){
+          const a=j*TAU/count+e.age*.6;
+          if(div>0)bullet(e.x,e.y,a,95,1,C.blue,3.5);
+          // A sink's ring is born outside and falls through the centre.
+          else if(div<0)bullet(e.x+Math.cos(a)*72,e.y+Math.sin(a)*72,a+Math.PI,82,1,C.blue,3.5);
+          else bullet(e.x,e.y,a,105,9,C.violet,3.5,curl>0?1.25:-1.25);
+        }
+        return;
+      }
+      case K.MATRIX:{
+        // The unit circle goes through A: shears and scalings fire an ellipse, rotations a turned ring.
+        e.fire+=1.85/r;const count=Math.max(8,Math.round(12*d)),spin=e.age*.7;
+        for(let j=0;j<count;j++){const a=j*TAU/count+spin,dx=Math.cos(a),dy=Math.sin(a),vx=e.a[0]*dx+e.a[1]*dy,vy=e.a[2]*dx+e.a[3]*dy;bullet(e.x,e.y,Math.atan2(vy,vx),clamp(70*Math.hypot(vx,vy),45,150),1,C.sepia,3.5);}
+        return;
+      }
+      case K.SIN:{
+        e.fire+=1.3/r;const count=Math.max(2,Math.round(3*d));
+        for(let j=0;j<count;j++){const base=Math.PI/2+(j-(count-1)/2)*.45,b=bullet(e.x,e.y+10,base,100,10,C.teal,3.5);if(b){b.ox=base;b.oy=e.phase*Math.PI/2;}}
+        return;
+      }
+      case K.GAUSS:{
+        // A bell-shaped fan: angles at normal quantiles, so the middle is the densest.
+        e.fire+=1.6/r;const count=Math.max(5,Math.round(9*d));
+        for(let j=0;j<count;j++)bullet(e.x,e.y+10,aim+.3*probit((j+.5)/count),118,1,C.teal,3.5);
+        return;
+      }
+      case K.POLE:{
+        e.fire+=1.7/r;const count=Math.max(8,Math.round(12*d));
+        for(let j=0;j<count;j++)bullet(e.x,e.y,j*TAU/count+e.age,j%2?70:112,1,C.violet,3.5);
+        return;
+      }
+      case K.POIS:{
+        // A Poisson process: exponential gaps, and a Poisson-sized burst that can be empty.
+        e.fire+=-Math.log(1-Math.random())/(.9*r);
+        const count=poisson(3.2*d);
+        for(let j=0;j<count;j++)bullet(e.x,e.y+10,aim+(j-(count-1)/2)*.13,128,1,C.red,3.5);
+        if(!count)note(e.x,e.y+30,'k = 0',C.pencil,.5);
+        return;
+      }
+      case K.GEOM:e.fire+=1.4/r;for(let j=-1;j<=1;j++)bullet(e.x,e.y+10,aim+j*.16,135,1,C.orange,3.5);return;
+      case K.HYPER:e.fire+=1.6/r;for(let j=0;j<6;j++)bullet(e.x,e.y+10,Math.PI/2+(j-2.5)*.22,105,1,C.sepia,3.5);return;
+      case K.BROWN:e.fire+=1.2/r;for(let j=0;j<Math.max(3,Math.round(4*d));j++)bullet(e.x,e.y+10,Math.PI/2+(Math.random()-.5)*1.6,90,11,C.violet,3.5,2.2);return;
+      case K.GBM:{
+        // A growing price trades more often.
+        e.fire+=1.7/(Math.sqrt(e.s)*r);const count=1+Math.min(4,Math.floor(e.s/1.5));
+        for(let j=0;j<count;j++)bullet(e.x,e.y+10,aim+(j-(count-1)/2)*.15,120+e.s*6,1,C.green,3.5);
+        return;
+      }
+      default:{
+        e.fire+=1.55/r;
+        const count=Math.max(3,Math.round((e.deg+2+(e.type===2?2:0))*d));
+        for(let j=0;j<count;j++){
+          const residue=(j+e.seed)%7;
+          const offset=e.type===0?(residue-3)*.16:e.type===1?.55*Math.tanh((j-(count-1)/2)*.8):e.type===2?.26*weierstrass(j*.18+e.age*.14):(j-(count-1)/2)*.2;
+          bullet(e.x,e.y+10,Math.PI/2+offset,e.type===2?128:110,e.type===0?0:1,fields[e.type].color,3.5);
+        }
+        if(e.deg>=3)bullet(e.x,e.y+10,aim,150,1,C.green,4);
+      }
+    }
   }
   function updateField(dt){
     if(game.transition>0)return;
     const setting=difficulties[game.difficulty];
     game.fieldSpawn-=dt;
-    if(game.fieldSpawn<=0){spawnFieldEnemy();game.fieldSpawn+=1.3/setting.rate;}
+    if(game.fieldSpawn<=0){spawnFieldEnemy();game.fieldSpawn+=(game.phase>=3?1.45:1.3)/setting.rate;}
     for(let i=enemies.count-1;i>=0;i--){
-      const e=enemies.items[i];e.age+=dt;e.y=e.baseY+e.age*44;e.flash=Math.max(0,e.flash-dt);e.immune=Math.max(0,e.immune-dt);
-      if(e.type===0)e.x=e.baseX+20*Math.sin(e.age*2+e.seed);
-      else if(e.type===1)e.x=300+(e.seed%2?1:-1)*170*Math.tanh(e.age*.5);
-      else e.x=e.baseX+65*weierstrass(e.age*.18+e.seed*.31);
-      if(e.y>H+25){removeEnemy(i);continue;}
+      const e=enemies.items[i];e.age+=dt;e.flash=Math.max(0,e.flash-dt);e.immune=Math.max(0,e.immune-dt);e.trial=Math.max(0,e.trial-dt);
+      moveEnemy(e,dt);
+      if(e.y>H+25||e.x<-80||e.x>W+80){removeEnemy(i);continue;}
       if(Math.hypot(e.x-player.x,e.y-player.y)<17&&player.invuln<=0){removeEnemy(i);hit();return;}
-      if(e.y<55||e.y>470)continue;
+      if(e.y<55||e.y>470||e.fn===K.DELTA)continue;
       e.fire-=dt;
-      if(e.fire>0)continue;
-      const aim=Math.atan2(player.y-e.y,player.x-e.x);
-      if(e.fn===1){
-        // eˣ reloads faster the longer it lives, and its bullets accelerate exponentially.
-        e.fire+=Math.max(.5,1.6*Math.exp(-.1*e.age))/setting.rate;
-        const count=Math.max(3,Math.round(5*setting.density));
-        for(let j=0;j<count;j++)bullet(e.x,e.y+10,aim+(j-(count-1)/2)*.2,45,4,C.red,4);
-        continue;
-      }
-      e.fire+=1.55/setting.rate;
-      const count=Math.max(3,Math.round((e.deg+2+(e.type===2?2:0))*setting.density));
-      for(let j=0;j<count;j++){
-        const residue=(j+e.seed)%7;
-        const offset=e.type===0?(residue-3)*.16:e.type===1?.55*Math.tanh((j-(count-1)/2)*.8):.26*weierstrass(j*.18+e.age*.14);
-        bullet(e.x,e.y+10,Math.PI/2+offset,e.type===2?128:110,e.type===0?0:1,fields[e.type].color,3.5);
-      }
-      if(e.deg>=3)bullet(e.x,e.y+10,aim,150,1,C.green,4);
+      if(e.fire<=0)fireEnemy(e,setting);
     }
   }
+  const poleXY=new Float32Array(16);let poleCount=0;
+  // Poles turn slowly around the boss so each can be cornered alone.
+  function placePoles(){
+    const list=spells[5].bodies[game.bodyIndex][2],th=game.bodyIndex===3?0:game.phaseTime*.3,c=Math.cos(th),s=Math.sin(th);
+    poleCount=list.length;
+    for(let k=0;k<poleCount;k++){const p=list[k];poleXY[k*4]=boss.x+(p[0]*c-p[1]*s)*POLE_R;poleXY[k*4+1]=boss.y+(p[0]*s+p[1]*c)*POLE_R;poleXY[k*4+2]=p[2];poleXY[k*4+3]=p[3];}
+  }
   function updateBoss(dt){
-    const t=game.phaseTime,setting=difficulties[game.difficulty],s=spells[game.phase];
-    game.pattern=game.phase===1&&Math.floor(Math.max(0,t-1.25)/7)%2===1?'B':'A';
-    if(game.phase===1&&game.pattern==='B'){
-      boss.x=300+202*Math.sin(t*1.4);boss.y=135+62*Math.sin(.014*(boss.x-300));
-    }else{boss.x=300+158*Math.sin(t*.73);boss.y=120+34*Math.sin(t*1.19);}
+    const t=game.phaseTime,setting=difficulties[game.difficulty],s=spells[game.phase],p=game.phase;
+    game.pattern=(p===1&&Math.floor(Math.max(0,t-1.25)/7)%2===1)||(p===3&&Math.floor(Math.max(0,t-1.25)/10)%2===1)?'B':'A';
+    if(p===1&&game.pattern==='B'){boss.x=300+202*Math.sin(t*1.4);boss.y=135+62*Math.sin(.014*(boss.x-300));}
+    else if(p===3){boss.x=300+130*Math.sin(t*.45);boss.y=190+35*Math.sin(t*.7);}
+    else if(p===4){boss.x=300+150*Math.sin(t*.5);boss.y=140+25*Math.sin(t*.9);}
+    else if(p===5){boss.x=300+110*Math.sin(t*.4);boss.y=175+30*Math.sin(t*.75);}
+    else if(p===6){boss.x=300+170*Math.sin(t*.35);boss.y=120+20*Math.sin(t*.6);}
+    else{boss.x=300+158*Math.sin(t*.73);boss.y=120+34*Math.sin(t*1.19);}
     // Boss 3 spends 5 of every 12 seconds as eˣ, where only ∂/∂y gets through.
-    const armor=game.phase===2&&t>1.25&&(t-1.25)%12>=7;
+    const armor=p===2&&t>1.25&&(t-1.25)%12>=7;
     if(armor&&!game.armor&&player.weapon!==1){game.itemToast=2.4;game.itemName='eˣ 상태 · d/dx와 ∇는 통하지 않습니다';}
     game.armor=armor;
-    const body=game.phase===2?(armor?1:0):Math.min(3,Math.floor((1-boss.hp/boss.max)*4));
+    const body=p===2?(armor?1:0):p===3?(game.pattern==='B'?1:0):Math.min(s.bodies.length-1,Math.floor((1-boss.hp/boss.max)*4));
     if(body!==game.bodyIndex){game.bodyIndex=body;note(boss.x,boss.y+64,`→ ${s.bodies[body][0]}`,s.color,1.1);tone(330,.2,.04,'triangle',660);}
+    if(p===5)placePoles();
     if(game.transition>0)return;
-    if(game.phase===0){
+    const d=setting.density,r=setting.rate;
+    if(p===0){
       game.spawn-=dt;game.aimed-=dt;
       if(game.spawn<=0){
-        game.spawn+=.85/setting.rate;
-        const count=Math.round(29*setting.density);
+        game.spawn+=.85/r;
+        const count=Math.round(29*d);
         for(let j=0;j<count;j++){const a=j*TAU/count+t*.29;bullet(boss.x,boss.y,a,120+17*Math.sin(t),0,j%3?C.green:C.orange,j%3?3.5:4.5);}
       }
       if(game.aimed<=0){
         // The aimed fan has 2·deg + 3 prongs, so each derivative takes two away.
-        game.aimed+=2.1/setting.rate;const a=Math.atan2(player.y-boss.y,player.x-boss.x),spread=4-game.bodyIndex;
+        game.aimed+=2.1/r;const a=Math.atan2(player.y-boss.y,player.x-boss.x),spread=4-game.bodyIndex;
         for(let j=-spread;j<=spread;j++)bullet(boss.x,boss.y,a+j*.15,145,0,C.orange,4);
       }
-    }else if(game.phase===1){
+    }else if(p===1){
       if(game.pattern==='A'){
         game.rose-=dt;
         if(game.rose<=0){
-          game.rose+=1.12/setting.rate;
+          game.rose+=1.12/r;
           const k=Math.floor(t/14)%2?5:4,rotation=t*.24;
-          const count=Math.round(67*setting.density);
+          const count=Math.round(67*d);
           for(let j=0;j<count;j++){
-            const a=j*TAU/count,r=80*Math.cos(k*a),dx=r*Math.cos(a+rotation),dy=r*Math.sin(a+rotation);
-            bullet(boss.x+dx,boss.y+dy,Math.atan2(dy,dx)+.12,78+33*Math.abs(r/80),1,j%2?C.violet:C.red,3.5);
+            const a=j*TAU/count,rr=80*Math.cos(k*a),dx=rr*Math.cos(a+rotation),dy=rr*Math.sin(a+rotation);
+            bullet(boss.x+dx,boss.y+dy,Math.atan2(dy,dx)+.12,78+33*Math.abs(rr/80),1,j%2?C.violet:C.red,3.5);
           }
         }
         game.tangent=0;
       }else{
         game.tangent-=dt;
         if(game.tangent<=0){
-          game.tangent+=.5/setting.rate;const w=warnings.take();
+          game.tangent+=.5/r;const w=warnings.take();
           if(w){w.x=boss.x;w.y=boss.y;w.angle=Math.atan(.868*Math.cos(.014*(boss.x-300)));w.age=0;w.next=.5;}
         }
         game.rose=.2;
       }
-    }else{
+    }else if(p===2){
       game.B=1.15*Math.sin(t*.58);game.spawn-=armor?dt*.45:dt;
       if(game.spawn<=0){
-        game.spawn+=.48/setting.rate;
-        const count=Math.round(27*setting.density/2)*2;
+        game.spawn+=.48/r;
+        const count=Math.round(27*d/2)*2;
         for(let j=0;j<count;j++){const q=j%2?1:-1;bullet(boss.x,boss.y,j*TAU/count+t*.47,115+20*Math.sin(t*.7),3,q>0?C.red:C.blue,4,q);}
       }
       if(armor){
         game.aimed-=dt;
-        if(game.aimed<=0){game.aimed+=1.05/setting.rate;const count=Math.round(22*setting.density);for(let j=0;j<count;j++)bullet(boss.x,boss.y,j*TAU/count+t*.31,30,4,C.orange,4);}
+        if(game.aimed<=0){game.aimed+=1.05/r;const count=Math.round(22*d);for(let j=0;j<count;j++)bullet(boss.x,boss.y,j*TAU/count+t*.31,30,4,C.orange,4);}
       }
+    }else if(p===3){
+      // Gauss: rings slow as 1/r and turn back whenever the charge flips. Stokes: arms in rigid rotation.
+      game.spawn-=dt;game.aimed-=dt;
+      if(game.pattern==='A'){
+        game.charge=Math.floor(Math.max(0,t-1.25)/3.4)%2?-1:1;
+        if(game.spawn<=0&&game.charge>0){game.spawn+=.62/r;const count=Math.round(30*d);for(let j=0;j<count;j++)bullet(boss.x,boss.y,j*TAU/count+t*.37,150,5,j%2?C.blue:C.teal,3.5);}
+      }else{
+        game.spin=Math.floor(Math.max(0,t-1.25)/20)%2?-1:1;
+        if(game.spawn<=0){game.spawn+=.13/r;const arms=Math.max(3,Math.round(5*d));for(let j=0;j<arms;j++)bullet(boss.x,boss.y,j*TAU/arms+t*1.7*game.spin,140,6,C.violet,3.5);}
+      }
+      if(game.aimed<=0){game.aimed+=1.7/r;const a=Math.atan2(player.y-boss.y,player.x-boss.x);for(let j=-1;j<=1;j++)bullet(boss.x,boss.y,a+j*.2,150,1,C.red,4);}
+    }else if(p===4){
+      // dx/dt = A(x − x₀): each ring starts small and is carried by eᴬᵗ.
+      game.spawn-=dt;game.aimed-=dt;
+      if(game.spawn<=0){
+        game.spawn+=.68/r;const count=Math.round(24*d);
+        for(let j=0;j<count;j++){const a=j*TAU/count+t*.21,b=bullet(boss.x+Math.cos(a)*26,boss.y+Math.sin(a)*26,a,100,7,j%2?C.sepia:C.orange,3.5);if(b){b.ox=boss.x;b.oy=boss.y;}}
+      }
+      if(game.aimed<=0){game.aimed+=2/r;const a=Math.atan2(player.y-boss.y,player.x-boss.x);for(let j=-2;j<=2;j++)bullet(boss.x,boss.y,a+j*.13,140,1,C.red,4);}
+    }else if(p===5){
+      // Bullets ride the Pólya field of f, so they circle or stream away from each pole.
+      game.spawn-=dt;game.aimed-=dt;
+      if(game.spawn<=0){
+        game.spawn+=.85/r;const count=Math.max(6,Math.round(9*d));
+        for(let k=0;k<poleCount;k++)for(let j=0;j<count;j++){const a=j*TAU/count+t;bullet(poleXY[k*4]+Math.cos(a)*12,poleXY[k*4+1]+Math.sin(a)*12,a,95,8,k%2?C.teal:C.violet,3.5);}
+      }
+      if(game.aimed<=0){game.aimed+=1.9/r;const a=Math.atan2(player.y-boss.y,player.x-boss.x);for(let j=-2;j<=2;j++)bullet(boss.x,boss.y,a+j*.14,135,1,C.red,4);}
+    }else{
+      stepConcentration(dt);
+      game.spawn-=dt;game.aimed-=dt;game.seed-=dt;game.emit-=dt;
+      if(game.seed<=0){game.seed+=3.2/r;for(let k=d>1?2:1;k>0;k--)splash(40+Math.random()*520,90+Math.random()*300,.95);}
+      if(game.emit<=0){game.emit+=.3/r;emitFromConcentration(d);}
+      if(game.spawn<=0){game.spawn+=1.3/r;const count=Math.round(20*d);for(let j=0;j<count;j++)bullet(boss.x,boss.y,j*TAU/count+t*.3,105,1,C.orange,4);}
+      if(game.aimed<=0){game.aimed+=1.8/r;const a=Math.atan2(player.y-boss.y,player.x-boss.x);for(let j=-1;j<=1;j++)bullet(boss.x,boss.y,a+j*.18,150,1,C.red,4);}
+    }
+  }
+  const cellAt=(x,y)=>{const cx=Math.floor(x/CELL),cy=Math.floor((y-GRID_TOP)/CELL);return cx<0||cy<0||cx>=GX||cy>=GY?-1:cy*GX+cx;};
+  function splash(x,y,v){const c=cellAt(x,y);if(c<0)return;for(const o of [0,1,GX,GX+1])if(c+o<conc.length)conc[c+o]=Math.max(conc[c+o],v);}
+  function scrubDisc(x,y,radius,amount){
+    for(let c=0;c<GX*GY;c++){if(conc[c]<=0)continue;const cx=(c%GX+.5)*CELL,cy=GRID_TOP+(Math.floor(c/GX)+.5)*CELL;if((cx-x)**2+(cy-y)**2<radius*radius)conc[c]=Math.max(0,conc[c]-amount);}
+  }
+  // Explicit five-point Laplacian with no-flux walls; D·dt/h² stays far below the ¼ stability limit.
+  function stepConcentration(dt){
+    const body=game.bodyIndex,D=.9,src=cellAt(boss.x,boss.y);
+    if(src>=0)conc[src]=Math.min(1,conc[src]+1.6*dt);
+    for(let y=0;y<GY;y++)for(let x=0;x<GX;x++){
+      const i=y*GX+x,u=conc[i];
+      const lap=(x>0?conc[i-1]:u)+(x<GX-1?conc[i+1]:u)+(y>0?conc[i-GX]:u)+(y<GY-1?conc[i+GX]:u)-4*u;
+      const f=body===0?-.25*u:body===2?2.4*u*(1-u)*(u-.3):.5*u*(1-u)-.1*u;
+      // The last body adds downwind advection, so fronts sweep toward the player.
+      const advect=body===3?1.2*(u-(y>0?conc[i-GX]:0)):0;
+      concNext[i]=clamp(u+dt*(D*lap+f-advect),0,1);
+    }
+    conc.set(concNext);
+    if(game.bomb>0)for(let i=0;i<conc.length;i++)conc[i]*=1-4*dt;
+  }
+  function emitFromConcentration(density){
+    // Start the scan at a random cell so the per-pass cap does not favour the top rows.
+    const n=GX*GY,start=Math.floor(Math.random()*n);let made=0;
+    for(let k=0;k<n&&made<9;k++){
+      const c=(start+k)%n,u=conc[c];if(u<.55||Math.random()>.035*density*(u-.5)*2)continue;
+      const x=(c%GX+.5)*CELL,y=GRID_TOP+(Math.floor(c/GX)+.5)*CELL;
+      if((x-player.x)**2+(y-player.y)**2<70*70)continue;
+      bullet(x,y,Math.random()*TAU,55+Math.random()*35,1,C.orange,3.5);made++;
     }
   }
   function updateWarnings(dt){
@@ -596,14 +1154,46 @@
       if(w.age>=.72)warnings.remove(i);
     }
   }
+  // Bullet kinds: 0 limit, 1 straight, 2 laser, 3 charge, 4 exp, 5 Gauss radial, 6 vortex, 7 dx/dt = Ax,
+  // 8 Pólya field, 9 constant curl, 10 sine weave, 11 Brownian heading.
+  function steerBullet(b,dt){
+    switch(b.kind){
+      case 5:{
+        const dx=b.x-boss.x,dy=b.y-boss.y,r=Math.max(18,Math.hypot(dx,dy));
+        b.angle=Math.atan2(dy,dx)+(game.charge<0?Math.PI:0);
+        if(game.charge<0&&r<24)return -1;
+        return b.speed*(40/r+.18);
+      }
+      case 6:{
+        const dx=b.x-boss.x,dy=b.y-boss.y,r=Math.max(1,Math.hypot(dx,dy)),ux=dx/r,uy=dy/r,vt=Math.min(b.speed,.6*r)*game.spin,vr=.32*b.speed;
+        const vx=ux*vr-uy*vt,vy=uy*vr+ux*vt;b.angle=Math.atan2(vy,vx);return Math.hypot(vx,vy);
+      }
+      case 7:{
+        const a=bossMatrix(),rx=b.x-b.ox,ry=b.y-b.oy,vx=a[0]*rx+a[1]*ry,vy=a[2]*rx+a[3]*ry,m=Math.hypot(vx,vy);
+        if(m>1e-6)b.angle=Math.atan2(vy,vx);return Math.min(260,m*b.speed/100);
+      }
+      case 8:{
+        if(game.segment!=='boss'||game.phase!==5)return b.speed;
+        // Rotate into the boss frame, evaluate conj f(z), add a little outward drift, rotate back.
+        const th=game.bodyIndex===3?0:game.phaseTime*.3,c=Math.cos(th),s=Math.sin(th),dx=(b.x-boss.x)/POLE_R,dy=(b.y-boss.y)/POLE_R;
+        const x=dx*c+dy*s,y=-dx*s+dy*c;spells[5].bodies[game.bodyIndex][1](x,y);
+        let vx=Z[0],vy=-Z[1];const m=Math.hypot(vx,vy)||1,r=Math.hypot(x,y)||1;vx=vx/m+.45*x/r;vy=vy/m+.45*y/r;
+        b.angle=Math.atan2(vx*s+vy*c,vx*c-vy*s);return b.speed;
+      }
+      case 9:b.angle+=b.q*dt;return b.speed;
+      case 10:b.angle=b.ox+.55*Math.sin(3*b.age+b.oy);return b.speed;
+      case 11:b.angle+=b.q*Math.sqrt(dt)*gauss();return b.speed;
+      case 0:{const d=Math.hypot(b.x-player.x,b.y-player.y);return d<120?b.speed*Math.max(.15,(d/120)**2):b.speed;}
+      case 4:return b.speed*Math.min(5,Math.exp(1.25*b.age));
+      default:return b.speed;
+    }
+  }
   function updateBullets(dt){
     for(let i=bullets.count-1;i>=0;i--){
       const b=bullets.items[i];b.px=b.x;b.py=b.y;b.age+=dt;
-      let speed=b.speed;
-      if(b.kind===0){const d=Math.hypot(b.x-player.x,b.y-player.y);if(d<120)speed*=Math.max(.15,(d/120)**2);}
-      else if(b.kind===4)speed*=Math.min(5,Math.exp(1.25*b.age));
       const fixed=game.freeze>0&&Math.hypot(b.x-game.freezeX,b.y-game.freezeY)<160;
-      if(fixed)speed=0;
+      let speed=fixed?0:steerBullet(b,dt);
+      if(speed<0){bullets.remove(i);continue;}
       if(b.kind===3&&!fixed)b.angle+=b.q*game.B*dt;
       b.x+=Math.cos(b.angle)*speed*dt;b.y+=Math.sin(b.angle)*speed*dt;
       if(game.bomb>0){
@@ -635,10 +1225,11 @@
   function nearestTarget(s){
     if(game.segment==='boss')return game.transition<=0&&!game.armor?boss:null;
     let best=Infinity,target=null;
-    for(let j=0;j<enemies.count;j++){const e=enemies.items[j];if(e.fn===1)continue;const d=(e.x-s.x)**2+(e.y-s.y)**2;if(d<best){best=d;target=e;}}
+    for(let j=0;j<enemies.count;j++){const e=enemies.items[j];if(!useful(e,s.op))continue;const d=(e.x-s.x)**2+(e.y-s.y)**2;if(d<best){best=d;target=e;}}
     return target;
   }
   function updateShots(dt){
+    const scrub=game.segment==='boss'&&game.phase===6;
     for(let i=shots.count-1;i>=0;i--){
       const s=shots.items[i];s.px=s.x;s.py=s.y;s.age+=dt;
       if(s.kind===1){
@@ -647,11 +1238,17 @@
         if(s.target&&targetAlive(s.target,s.tid))steer(s,s.target.x,s.target.y,9,dt);else s.target=null;
         s.speed=Math.min(860,s.speed+dt*1300);
       }
-      s.x+=Math.cos(s.angle)*s.speed*dt;s.y+=Math.sin(s.angle)*s.speed*dt;
+      if(s.kind===4){
+        // The wave shot's centre flies straight; the shot itself sways across it.
+        s.ox+=Math.cos(s.angle)*s.speed*dt;s.oy+=Math.sin(s.angle)*s.speed*dt;
+        const w=s.amp*Math.sin(s.freq*s.age);s.x=s.ox-Math.sin(s.angle)*w;s.y=s.oy+Math.cos(s.angle)*w;
+      }else{s.x+=Math.cos(s.angle)*s.speed*dt;s.y+=Math.sin(s.angle)*s.speed*dt;}
+      if(s.op!==O.INV&&s.kind!==2){const a=s.angle;bend(s);if(s.kind===4&&s.angle!==a){s.ox=s.x;s.oy=s.y;s.amp=0;}}
       if(s.kind===1||s.kind===3){s.head=(s.head+2)%s.trail.length;s.trail[s.head]=s.x;s.trail[s.head+1]=s.y;}
       if(s.kind===2){
         for(let j=bullets.count-1;j>=0;j--){const b=bullets.items[j];if(segmentDistanceSq(b.x,b.y,s.px,s.py,s.x,s.y)<(15+b.radius)**2){game.score+=25;bullets.remove(j);}}
       }
+      if(scrub){const c=cellAt(s.x,s.y);if(c>=0)conc[c]=Math.max(0,conc[c]-(s.op===O.FT?.45:s.op===O.E?.3:s.kind===2?.5:.12));}
       if(game.segment==='field'){
         let struck=false;
         for(let j=enemies.count-1;j>=0;j--){
@@ -676,7 +1273,7 @@
   function update(dt){
     game.t+=dt;game.phaseTime+=dt;game.banner=Math.max(0,game.banner-dt);game.transition=Math.max(0,game.transition-dt);
     game.shake=Math.max(0,game.shake-dt);game.flash=Math.max(0,game.flash-dt);game.bomb=Math.max(0,game.bomb-dt);game.freeze=Math.max(0,game.freeze-dt);game.freezeCooldown=Math.max(0,game.freezeCooldown-dt);
-    game.bossImmune=Math.max(0,game.bossImmune-dt);game.bossHit=Math.max(0,game.bossHit-dt);
+    game.bossImmune=Math.max(0,game.bossImmune-dt);game.bossHit=Math.max(0,game.bossHit-dt);loop.flash=Math.max(0,loop.flash-dt);
     player.invuln=Math.max(0,player.invuln-dt);player.lance=Math.max(0,player.lance-dt);player.shieldTime=Math.max(0,player.shieldTime-dt);if(player.shieldTime===0)player.shield=0;
     player.homingCd=Math.max(0,player.homingCd-dt);player.overheat=Math.max(0,player.overheat-dt);
     game.remaining=Math.max(0,(game.segment==='boss'?spells[game.phase].duration:fields[game.phase].duration)-Math.max(0,game.phaseTime-(game.segment==='boss'?1.25:.8)));
@@ -695,13 +1292,50 @@
     }
   }
 
-  function drawBackground(){ctx.drawImage(paper,0,(visualTime*14)%100-100);}
+  function drawBackground(){ctx.drawImage(paper,0,Math.round(((visualTime*14)%100-100)*scale)/scale,W,H+100);}
+  // Three Brownian sample paths for the probability chapter's margin figure, fixed by a seeded generator.
+  const samplePaths=(()=>{let seed=11;const rnd=()=>(seed=seed*16807%2147483647)/2147483647,paths=[];
+    for(let p=0;p<3;p++){const ys=new Float32Array(121);let y=0;for(let i=1;i<121;i++){const u=Math.max(1e-9,rnd());y+=Math.sqrt(-2*Math.log(u))*Math.cos(TAU*rnd())*7;ys[i]=y;}paths.push(ys);}
+    return paths;})();
   function drawFieldMath(){
     const type=game.phase,color=fields[type].color;
     ctx.save();ctx.globalAlpha=.55;
     if(type===0){
       ctx.setLineDash([3,6]);for(let n=0;n<7;n++)line(55+n*81,72,55+n*81,650,color,1);ctx.setLineDash([]);
       for(let n=0;n<7;n++)text(String(n),55+n*81,92,14,color,'center','math');
+    }else if(type===3){
+      // A slowly turning blend of a vortex and a source, sampled on a coarse grid.
+      const phi=visualTime*.15,cs=Math.cos(phi),sn=Math.sin(phi);ctx.globalAlpha=.32;ctx.strokeStyle=C.pencil;ctx.lineWidth=1;ctx.beginPath();
+      const heads=[];
+      for(let y=90;y<680;y+=50)for(let x=25;x<600;x+=50){
+        const rx=x-300,ry=y-380,vx=-ry*cs+rx*sn,vy=rx*cs+ry*sn,m=Math.hypot(vx,vy)||1,ux=vx/m*11,uy=vy/m*11;
+        ctx.moveTo(x-ux,y-uy);ctx.lineTo(x+ux,y+uy);heads.push(x+ux,y+uy,Math.atan2(uy,ux));
+      }
+      ctx.stroke();for(let k=0;k<heads.length;k+=3)arrow(heads[k],heads[k+1],heads[k+2],C.pencil,5);
+    }else if(type===4){
+      // The integer lattice pushed through a slowly changing matrix, with the images of î and ĵ.
+      const a=1,b=.45*Math.sin(visualTime*.2),c=.28*Math.sin(visualTime*.13),d=1,ox=300,oy=380;
+      const map=(x,y)=>[ox+a*x+b*y,oy+c*x+d*y];
+      ctx.globalAlpha=.35;ctx.strokeStyle=C.blue;ctx.lineWidth=1;ctx.beginPath();
+      for(let k=-7;k<=7;k++){let p=map(k*50,-400),q=map(k*50,400);ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);p=map(-400,k*50);q=map(400,k*50);ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);}
+      ctx.stroke();ctx.globalAlpha=.7;
+      const i1=map(50,0),j1=map(0,50);line(ox,oy,i1[0],i1[1],C.red,2);arrow(i1[0],i1[1],Math.atan2(c,a),C.red,7);line(ox,oy,j1[0],j1[1],C.green,2);arrow(j1[0],j1[1],Math.atan2(d,b),C.green,7);
+      text('Aî',i1[0]+6,i1[1]-6,13,C.red,'left','math');text('Aĵ',j1[0]+6,j1[1]+14,13,C.green,'left','math');
+    }else if(type===5){
+      // A square wave in pencil and its first three odd harmonics summed in ink.
+      line(24,380,576,380,C.pencil,1);ctx.setLineDash([4,5]);ctx.strokeStyle=C.pencil;ctx.lineWidth=1.2;ctx.beginPath();
+      for(let x=0;x<=W;x+=2){const y=380-60*Math.sign(Math.sin((x/W*4+visualTime*.05)*TAU));if(x)ctx.lineTo(x,y);else ctx.moveTo(x,y);}
+      ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.beginPath();
+      for(let x=0;x<=W;x+=2){const u=(x/W*4+visualTime*.05)*TAU;let s=0;for(let h=1;h<=5;h+=2)s+=Math.sin(h*u)/h;const y=380-60*4/Math.PI*s;if(x)ctx.lineTo(x,y);else ctx.moveTo(x,y);}
+      ctx.stroke();
+      for(let h=1;h<=5;h+=2){const x=60+h*40;line(x,640,x,640-60/h,color,3);text(`${h}ω`,x,656,11,C.pencil,'center','math');}
+      line(40,640.5,320,640.5,C.pencil,1);text('|F(ω)|',40,592,12,C.pencil,'left','math');
+    }else if(type===6){
+      ctx.lineWidth=1.3;
+      samplePaths.forEach((ys,p)=>{ctx.strokeStyle=[C.violet,C.red,C.pencil][p];ctx.beginPath();for(let i=0;i<121;i++){const x=i*5,y=380+ys[i]*(.6+p*.2);if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.stroke();});
+      line(24,380,576,380,C.pencil,1);ctx.strokeStyle=C.pencil;ctx.lineWidth=1;ctx.beginPath();
+      for(let x=0;x<=200;x+=2){const z=(x-100)/32,y=650-80*Math.exp(-z*z/2);if(x)ctx.lineTo(380+x,y);else ctx.moveTo(380+x,y);}
+      ctx.stroke();text('N(0, t)',480,560,12,C.pencil,'center','math');text('Wₜ',560,370,14,C.violet,'right','math');
     }else{
       // A textbook figure in pencil: axes, ticks, asymptotes and the stage curve.
       line(24,380,576,380,C.pencil,1);line(300,640,300,78,C.pencil,1);arrow(578,380,0);arrow(300,76,-Math.PI/2);
@@ -714,24 +1348,84 @@
     }
     ctx.restore();
   }
+  const KIND_COLOR=[C.blue,C.red,C.blue,C.sepia,C.teal,C.red,C.teal,C.violet,C.red,C.orange,C.sepia,C.violet,C.green];
+  // The margin note on each card: the one operator that settles it.
+  const KIND_TAG=['','∂','∮','A⁻¹','ℱ','∂','','∮','𝔼','','','𝔼','𝔼'];
+  const entry=v=>v===0?'0':(v<0?'−':'')+String(Math.abs(v)).replace(/^0\./,'.');
+  function drawFieldGlyph(e,w){
+    // Eight arrows around the card show F on a circle: outward, inward or round.
+    ctx.strokeStyle=C.blue;ctx.lineWidth=1.2;ctx.beginPath();const r=w/2+12,heads=[];
+    for(let k=0;k<8;k++){
+      const a=k*TAU/8+e.age*.5,cx=e.x+Math.cos(a)*r,cy=e.y+Math.sin(a)*r*.7,dx=Math.cos(a),dy=Math.sin(a);
+      const vx=e.a[0]*dx+e.a[1]*dy,vy=e.a[2]*dx+e.a[3]*dy,m=Math.hypot(vx,vy)||1,ux=vx/m*5,uy=vy/m*5;
+      ctx.moveTo(cx-ux,cy-uy);ctx.lineTo(cx+ux,cy+uy);heads.push(cx+ux,cy+uy,Math.atan2(uy,ux));
+    }
+    ctx.stroke();for(let k=0;k<heads.length;k+=3)arrow(heads[k],heads[k+1],heads[k+2],C.blue,4);
+  }
+  function drawMatrixEnemy(e){
+    const a=e.a,s=15;
+    ctx.save();ctx.globalAlpha=.4;ctx.setLineDash([3,5]);circle(e.x,e.y,44,C.sepia,1);ctx.setLineDash([]);
+    // The unit square's image under A sits behind the card.
+    ctx.globalAlpha=.16;ctx.fillStyle=C.sepia;ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+a[0]*s,e.y+a[2]*s);ctx.lineTo(e.x+(a[0]+a[1])*s,e.y+(a[2]+a[3])*s);ctx.lineTo(e.x+a[1]*s,e.y+a[3]*s);ctx.closePath();ctx.fill();
+    ctx.restore();
+    ctx.font=`italic 14px ${FONTS.math}`;
+    const top=`${entry(a[0])}   ${entry(a[1])}`,bottom=`${entry(a[2])}   ${entry(a[3])}`,w=Math.max(48,Math.max(ctx.measureText(top).width,ctx.measureText(bottom).width)+22),h=38;
+    ctx.save();ctx.translate(e.x,e.y);ctx.rotate(Math.sin(e.age*1.4+e.seed)*.05);
+    ctx.fillStyle=e.flash>0?C.yellow:C.white;ctx.fillRect(-w/2,-h/2,w,h);sketchRect(-w/2,-h/2,w,h,e.id);
+    ctx.strokeStyle=C.sepia;ctx.lineWidth=1.3;ctx.beginPath();
+    for(const side of [-1,1]){const x=side*(w/2-6);ctx.moveTo(x-side*3,-13);ctx.lineTo(x,-13);ctx.lineTo(x,13);ctx.lineTo(x-side*3,13);}
+    ctx.stroke();
+    ctx.fillStyle=C.sepia;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(top,0,-6);ctx.fillText(bottom,0,8);
+    if(e.pd>0){ctx.strokeStyle=C.red;ctx.lineWidth=2.2;ctx.beginPath();ctx.arc(0,0,w/2+5,-Math.PI/2,-Math.PI/2+TAU*clamp(e.pd/remainder(e),0,1));ctx.stroke();}
+    ctx.restore();
+    text('A⁻¹',e.x+w/2+2,e.y-h/2-2,11,C.red,'left','math');
+    const f=clamp(e.hp/e.max,0,1);ctx.fillStyle=C.sepia;ctx.fillRect(e.x-w/2,e.y+h/2+4,w*f,3);
+  }
   function drawEnemies(){
     for(let i=0;i<enemies.count;i++){
-      const e=enemies.items[i],exp=e.fn===1,label=enemyText(e);
-      ctx.font=`italic ${exp?19:16}px ${FONTS.math}`;
-      const w=Math.max(30,ctx.measureText(label).width+16);
+      const e=enemies.items[i],k=e.fn;
+      if(k===K.MATRIX){drawMatrixEnemy(e);continue;}
+      if(k===K.BROWN||k===K.GBM){
+        // The last 0.7 s of the sample path, jagged as Brownian paths are.
+        ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle=KIND_COLOR[k];ctx.lineWidth=1.2;ctx.beginPath();
+        for(let n=1;n<=e.path.length/2;n++){const j=(e.ph+n*2)%e.path.length;if(n===1)ctx.moveTo(e.path[j],e.path[j+1]);else ctx.lineTo(e.path[j],e.path[j+1]);}
+        ctx.lineTo(e.x,e.y);ctx.stroke();ctx.restore();
+      }
+      const label=enemyText(e),only=k===K.EXP||k===K.GAUSS,size=k===K.DELTA?12:only?18:k===K.FIELD||k>=K.POIS?14:16;
+      ctx.font=`italic ${size}px ${FONTS.math}`;
+      const w=Math.max(k===K.DELTA?44:30,ctx.measureText(label).width+16),h=k===K.DELTA?20:26;
+      if(k===K.FIELD)drawFieldGlyph(e,w);
       ctx.save();ctx.translate(e.x,e.y);ctx.rotate(Math.sin(e.age*1.4+e.seed)*.07);
-      ctx.fillStyle=e.flash>0?C.yellow:C.white;ctx.fillRect(-w/2,-13,w,26);
-      ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.strokeRect(-w/2,-13,w,26);
-      if(exp){ctx.strokeStyle=C.red;ctx.lineWidth=1;ctx.strokeRect(-w/2+3,-10,w-6,20);}
-      ctx.fillStyle=exp?C.red:C.blue;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,1);
+      ctx.fillStyle=e.flash>0?C.yellow:C.white;
+      if(k===K.POLE||k===K.DELTA){ctx.beginPath();ctx.ellipse(0,0,w/2,h/2+2,0,0,TAU);ctx.fill();ctx.strokeStyle=C.ink;ctx.lineWidth=1.4;ctx.stroke();}
+      else{ctx.fillRect(-w/2,-h/2,w,h);sketchRect(-w/2,-h/2,w,h,e.id);}
+      if(only){ctx.strokeStyle=C.red;ctx.lineWidth=1;ctx.strokeRect(-w/2+3,-h/2+3,w-6,h-6);}
+      if(k===K.BROWN||k===K.GBM||k===K.POIS){ctx.setLineDash([2,3]);ctx.strokeStyle=C.violet;ctx.lineWidth=1;ctx.strokeRect(-w/2+3,-h/2+3,w-6,h-6);ctx.setLineDash([]);}
+      ctx.fillStyle=KIND_COLOR[k];ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,1);
       if(e.pd>0){ctx.strokeStyle=C.red;ctx.lineWidth=2.2;ctx.beginPath();ctx.arc(0,0,w/2+5,-Math.PI/2,-Math.PI/2+TAU*clamp(e.pd/remainder(e),0,1));ctx.stroke();}
       ctx.restore();
-      // One pip per derivative still needed; the last pip shows the current layer.
-      const left=e.deg+1,y=e.y+17;
-      for(let k=0;k<left;k++){
-        const x=e.x-(left-1)*4+k*8-2.5;
-        ctx.fillStyle=exp?C.red:C.ink;
-        if(k<left-1)ctx.fillRect(x,y,5,5);else{const f=clamp(e.hp/e.max,0,1);ctx.fillRect(x,y+5-5*f,5,5*f);ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,4,4);}
+      if(KIND_TAG[k])text(KIND_TAG[k],e.x+w/2+2,e.y-h/2-2,11,C.red,'left','math');
+      const y=e.y+h/2+4;
+      if(k===K.POLY||k===K.EXP||k===K.FIELD||k===K.GAUSS||k===K.POLE){
+        // One pip per derivative still needed; the last pip shows the current layer.
+        const left=e.deg+1;
+        for(let n=0;n<left;n++){
+          const x=e.x-(left-1)*4+n*8-2.5;ctx.fillStyle=only?C.red:C.ink;
+          if(n<left-1)ctx.fillRect(x,y,5,5);else{const f=clamp(e.hp/e.max,0,1);ctx.fillRect(x,y+5-5*f,5,5*f);ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,4,4);}
+        }
+      }else if(k===K.SIN){
+        // Four phases of the derivative cycle; the filled one is where it is now.
+        for(let n=0;n<4;n++){const x=e.x-12+n*8;if(n===e.phase){ctx.fillStyle=C.teal;ctx.beginPath();ctx.arc(x,y+3,2.6,0,TAU);ctx.fill();}else circle(x,y+3,2.4,C.teal,1);}
+      }else if(k===K.GEOM){
+        ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.beginPath();
+        for(let n=0;n<Math.min(15,e.p);n++){const x=e.x-24+n*3.4+Math.floor(n/5)*3;if(n%5===4){ctx.moveTo(x-14,y+6);ctx.lineTo(x+1,y);}else{ctx.moveTo(x,y);ctx.lineTo(x,y+6);}}
+        ctx.stroke();
+      }else if(k===K.HYPER){
+        for(let n=0;n<8;n++){
+          const x=e.x-24+n*6,drawn=e.deck>>n&1,marked=e.mark>>n&1;
+          if(drawn&&marked){ctx.fillStyle=C.red;ctx.fillRect(x,y,4.5,6);}
+          else{ctx.strokeStyle=drawn?C.pencil:C.ink;ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,3.5,5);if(drawn)line(x,y+6,x+4.5,y,C.pencil,1);}
+        }
       }
     }
   }
@@ -748,36 +1442,122 @@
     ctx.save();ctx.globalAlpha=Math.min(.8,game.freeze*.5);ctx.setLineDash([4,6]);circle(game.freezeX,game.freezeY,160,C.blue,1.6);ctx.setLineDash([]);
     text('dx/dt = 0',game.freezeX,game.freezeY-166,15,C.blue,'center','math');ctx.restore();
   }
-  function drawBoss(){
-    const s=spells[game.phase],plot=s.plots[game.bodyIndex],t=visualTime,bx=boss.x,by=boss.y;
-    // The boss is literally its own graph, redrawn after every derivative.
-    ctx.save();ctx.globalAlpha=.9;ctx.fillStyle=C.white;ctx.fillRect(bx-72,by-44,144,88);ctx.globalAlpha=1;
-    ctx.strokeStyle=game.armor?C.red:C.ink;ctx.lineWidth=game.armor?2.4:1.3;ctx.strokeRect(bx-72,by-44,144,88);
-    line(bx-64,by,bx+64,by,C.pencil,.8);line(bx,by-38,bx,by+38,C.pencil,.8);arrow(bx+66,by,0,C.pencil,4);arrow(bx,by-40,-Math.PI/2,C.pencil,4);
-    ctx.strokeStyle=s.color;ctx.lineWidth=2.4;ctx.beginPath();
-    for(let i=0;i<plot.length;i++){const px=bx-60+i*120/(plot.length-1),py=by-plot[i]*34;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py);}
+  // u is painted as a soft wash from a 30×32 image, then its u = .55 level set is traced in ink.
+  const concCanvas=document.createElement('canvas');concCanvas.width=GX;concCanvas.height=GY;let concImage;
+  const SEGMENTS=['','LB','BR','LR','TR','LTBR','TB','LT','LT','TB','TRLB','TR','LR','BR','LB',''];
+  function drawConcentration(){
+    const g=concCanvas.getContext('2d');
+    if(concImage===undefined)concImage=g.createImageData?g.createImageData(GX,GY)||null:null;
+    if(concImage&&concImage.data){
+      const d=concImage.data;
+      for(let i=0;i<GX*GY;i++){const u=conc[i];d[i*4]=226-20*u;d[i*4+1]=140-60*u;d[i*4+2]=70-30*u;d[i*4+3]=u<.02?0:22+100*u;}
+      g.putImageData(concImage,0,0);
+      ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(concCanvas,0,GRID_TOP,GX*CELL,GY*CELL);ctx.restore();
+    }
+    const level=.55,pt=(edge,x,y,i)=>{
+      const a=conc[i],b=conc[i+1],c=conc[i+GX+1],d=conc[i+GX],X=(x+.5)*CELL,Y=GRID_TOP+(y+.5)*CELL;
+      if(edge==='T')return [X+CELL*(level-a)/(b-a),Y];
+      if(edge==='R')return [X+CELL,Y+CELL*(level-b)/(c-b)];
+      if(edge==='B')return [X+CELL*(level-d)/(c-d),Y+CELL];
+      return [X,Y+CELL*(level-a)/(d-a)];
+    };
+    ctx.save();ctx.strokeStyle=C.red;ctx.lineWidth=1.3;ctx.globalAlpha=.8;ctx.beginPath();
+    for(let y=0;y<GY-1;y++)for(let x=0;x<GX-1;x++){
+      const i=y*GX+x,idx=(conc[i]>level?8:0)|(conc[i+1]>level?4:0)|(conc[i+GX+1]>level?2:0)|(conc[i+GX]>level?1:0),seg=SEGMENTS[idx];
+      for(let k=0;k<seg.length;k+=2){const p=pt(seg[k],x,y,i),q=pt(seg[k+1],x,y,i);ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);}
+    }
     ctx.stroke();ctx.restore();
+  }
+  // Domain-colouring portraits of each complex body: hue is arg f, the bands are octaves of |f|.
+  const portraits=[];
+  function portrait(index){
+    if(portraits[index]!==undefined)return portraits[index];
+    const n=264,c=document.createElement('canvas');c.width=n;c.height=n;
+    const g=c.getContext('2d'),img=g.createImageData?g.createImageData(n,n):null;
+    if(!img||!img.data)return portraits[index]=null;
+    const f=spells[5].bodies[index][1],data=img.data,span=1.7;
+    for(let py=0;py<n;py++)for(let px=0;px<n;px++){
+      f((px/n-.5)*2*span,(py/n-.5)*2*span);
+      const hue=(Math.atan2(Z[1],Z[0])/TAU+1)%1,m=Math.log2(Math.hypot(Z[0],Z[1])+1e-12),band=m-Math.floor(m);
+      const ray=(hue*12)%1,l=(ray<.06?.52:.64)+.13*band,s=.44,q=l<.5?l*(1+s):l+s-l*s,p=2*l-q,o=(py*n+px)*4;
+      for(let ch=0;ch<3;ch++){let t=hue+(1-ch)/3;t-=Math.floor(t);data[o+ch]=255*(t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p);}
+      data[o+3]=255;
+    }
+    g.putImageData(img,0,0);return portraits[index]=c;
+  }
+  function drawBoss(){
+    const s=spells[game.phase],t=visualTime,bx=boss.x,by=boss.y,body=s.bodies[game.bodyIndex];
+    if(game.phase===3){
+      // The boss's own field around it: a Gaussian surface while it is a source, flow lines while it turns.
+      ctx.save();ctx.globalAlpha=.5;
+      if(game.bodyIndex===0){ctx.setLineDash([6,6]);circle(bx,by,118,C.blue,1.2);ctx.setLineDash([]);text(game.charge>0?'∯ F·n dS = +Q':'∯ F·n dS = −Q',bx+92,by-92,12,C.blue,'left','math');}
+      for(let k=0;k<12;k++){const a=k*TAU/12+t*.2,x=bx+Math.cos(a)*118,y=by+Math.sin(a)*118,d=game.bodyIndex===0?a+(game.charge>0?0:Math.PI):a+Math.PI/2*game.spin;line(x-Math.cos(d)*7,y-Math.sin(d)*7,x+Math.cos(d)*7,y+Math.sin(d)*7,C.blue,1.2);arrow(x+Math.cos(d)*7,y+Math.sin(d)*7,d,C.blue,5);}
+      ctx.restore();
+    }else if(game.phase===4&&body[3]){
+      // Real eigenvectors are lines that A only stretches.
+      ctx.save();ctx.globalAlpha=.55;ctx.setLineDash([10,6]);
+      for(const [vx,vy,lambda] of body[3]){const m=Math.hypot(vx,vy);line(bx-vx/m*700,by-vy/m*700,bx+vx/m*700,by+vy/m*700,C.sepia,1.2);text(`λ = ${lambda}`,bx+vx/m*150+6,by+vy/m*150-6,12,C.sepia,'left','math');}
+      ctx.restore();
+    }
+    ctx.save();ctx.globalAlpha=.92;ctx.fillStyle=C.white;ctx.fillRect(bx-72,by-44,144,88);ctx.restore();
+    if(s.view==='graph'){
+      const plot=s.plots[game.bodyIndex];
+      line(bx-64,by,bx+64,by,C.pencil,.8);line(bx,by-38,bx,by+38,C.pencil,.8);arrow(bx+66,by,0,C.pencil,4);arrow(bx,by-40,-Math.PI/2,C.pencil,4);
+      ctx.strokeStyle=s.color;ctx.lineWidth=2.4;ctx.beginPath();
+      for(let i=0;i<plot.length;i++){const px=bx-60+i*120/(plot.length-1),py=by-plot[i]*34;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py);}
+      ctx.stroke();
+    }else if(s.view==='field'){
+      const a=body[1];ctx.strokeStyle=C.blue;ctx.lineWidth=1.2;ctx.beginPath();const heads=[];
+      for(let gy=-1;gy<=1;gy++)for(let gx=-2;gx<=2;gx++){
+        if(!gx&&!gy)continue;const x=bx+gx*26,y=by+gy*26,vx=a[0]*gx+a[1]*gy,vy=a[2]*gx+a[3]*gy,m=Math.hypot(vx,vy)||1,ux=vx/m*8,uy=vy/m*8;
+        ctx.moveTo(x-ux,y-uy);ctx.lineTo(x+ux,y+uy);heads.push(x+ux,y+uy,Math.atan2(uy,ux));
+      }
+      ctx.stroke();for(let k=0;k<heads.length;k+=3)arrow(heads[k],heads[k+1],heads[k+2],C.blue,5);
+    }else if(s.view==='matrix'){
+      // The unit square and its image under A, with Aî and Aĵ.
+      const a=body[1],u=30;
+      ctx.save();ctx.setLineDash([2,3]);ctx.strokeStyle=C.pencil;ctx.lineWidth=1;ctx.strokeRect(bx,by,u,u);ctx.restore();
+      ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=C.sepia;ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+a[0]*u,by+a[2]*u);ctx.lineTo(bx+(a[0]+a[1])*u,by+(a[2]+a[3])*u);ctx.lineTo(bx+a[1]*u,by+a[3]*u);ctx.closePath();ctx.fill();ctx.restore();
+      line(bx,by,bx+a[0]*u,by+a[2]*u,C.red,2);line(bx,by,bx+a[1]*u,by+a[3]*u,C.green,2);
+      text('Aî',bx+a[0]*u+4,by+a[2]*u+4,11,C.red,'left','math');text('Aĵ',bx+a[1]*u+4,by+a[3]*u+10,11,C.green,'left','math');
+    }else{
+      const img=portrait(game.bodyIndex),th=game.bodyIndex===3?0:game.phaseTime*.3;
+      ctx.save();ctx.beginPath();ctx.rect(bx-72,by-44,144,88);ctx.clip();ctx.translate(bx,by);ctx.rotate(th);
+      if(img){ctx.globalAlpha=.85;ctx.drawImage(img,-88,-88,176,176);}
+      ctx.restore();
+    }
+    sketchRect(bx-72,by-44,144,88,31+game.phase*7+game.bodyIndex,game.armor?C.red:C.ink,game.armor?2.4:1.4);
     if(game.phase===1){
       ctx.save();ctx.translate(bx,by);ctx.rotate(game.phaseTime*.24);ctx.globalAlpha=.35;ctx.strokeStyle=C.violet;ctx.lineWidth=1;ctx.beginPath();
       const k=Math.floor(game.phaseTime/14)%2?5:4;
       for(let j=0;j<=240;j++){const a=j*TAU/240,r=80*Math.cos(k*a);if(!j)ctx.moveTo(r*Math.cos(a),r*Math.sin(a));else ctx.lineTo(r*Math.cos(a),r*Math.sin(a));}
       ctx.stroke();ctx.restore();
     }
+    if(game.phase===5)for(let k=0;k<poleCount;k++){
+      // Poles are crosses, as in a pole-zero plot, each with its residue.
+      const x=poleXY[k*4],y=poleXY[k*4+1],inside=player.ring&&(x-player.x)**2+(y-player.y)**2<CIRCLE_R*CIRCLE_R;
+      ctx.fillStyle=C.white;ctx.beginPath();ctx.arc(x,y,11,0,TAU);ctx.fill();circle(x,y,11,inside?C.red:C.ink,inside?2:1.2);
+      line(x-6,y-6,x+6,y+6,C.ink,2);line(x-6,y+6,x+6,y-6,C.ink,2);
+      text(`Res ${fmtC(poleXY[k*4+2],poleXY[k*4+3])}`,x,y+25,11,C.teal,'center','math');
+    }
     ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(bx,by,15,0,TAU);ctx.fill();
     text(s.glyph,bx,by+(s.glyph.length>1?4:6),s.glyph.length>1?12:17,C.paper,'center','math');
     if(game.bossHit>0)circle(bx,by,19,C.red,2);
     if(game.armor){ctx.save();ctx.setLineDash([5,4]);circle(bx,by,25+2*Math.sin(t*8),C.red,2.2);ctx.restore();}
-    text(`y = ${s.bodies[game.bodyIndex][0]}`,bx,by+62,16,s.color,'center','math');
-    if(game.armor)text('∂/∂y만 통함',bx,by+80,11,C.red,'center','sans',true);
+    const name=s.view==='graph'&&!s.range?`y = ${body[0]}`:s.view==='complex'?`f(z) = ${body[0]}`:body[0];
+    text(name,bx,by+62,15,s.color,'center','math');
+    const sub=game.armor?'∂/∂y만 통함':s.view==='matrix'?body[2]:s.view==='field'?(game.bodyIndex?'∇×F = 2 · 스토크스':'∇·F = 2 · 가우스'):'';
+    if(sub)text(sub,bx,by+79,11,game.armor?C.red:C.pencil,'center',s.view==='matrix'?'math':'sans',game.armor);
   }
   function drawPlayer(){
-    const t=visualTime,op=['d','∂','∇'][player.weapon];
+    const t=visualTime,op=['d','∂','∇','∮','A','ℱ','𝔼'][player.weapon];
     if(game.phase===0&&game.mode==='playing'){
       ctx.save();ctx.globalAlpha=player.focus?.5:.22;ctx.setLineDash([2,6]);circle(player.x,player.y,120,C.green);ctx.setLineDash([]);
       if(player.focus)text('δ = 120',player.x+86,player.y-86,11,C.green,'center','math');ctx.restore();
     }
     for(const side of [-1,1]){
-      const ox=player.x+side*(player.focus?19:27),oy=player.y+3+Math.sin(t*3+side)*3;
+      // On the circle C the options ride the contour; otherwise they flank the pen.
+      const a=t*2.4+(side>0?0:Math.PI),ox=player.ring?player.x+Math.cos(a)*CIRCLE_R:player.x+side*(player.focus?19:27),oy=player.ring?player.y+Math.sin(a)*CIRCLE_R:player.y+3+Math.sin(t*3+side)*3;
       ctx.fillStyle=C.white;ctx.beginPath();ctx.arc(ox,oy,7.5,0,TAU);ctx.fill();circle(ox,oy,7.5,C.ink,1.3);
       text(op,ox,oy+4,11,C.ink,'center','math');
     }
@@ -801,6 +1581,20 @@
       ctx.save();ctx.fillStyle=C.marker;ctx.globalAlpha=.32;ctx.beginPath();ctx.moveTo(player.x,player.y);ctx.arc(player.x,player.y,230,-Math.PI/2-.45,-Math.PI/2+.45);ctx.closePath();ctx.fill();
       ctx.globalAlpha=.85;ctx.strokeStyle=C.red;ctx.lineWidth=1.2;ctx.stroke();ctx.restore();text('∂/∂y',player.x+20,player.y-40,13,C.red,'left','math');
     }
+    if(player.ring){
+      // The contour C, oriented counter-clockwise.
+      ctx.save();ctx.setLineDash([5,4]);circle(player.x,player.y,CIRCLE_R,C.ink,1.4);ctx.setLineDash([]);
+      for(let k=0;k<4;k++){const a=k*Math.PI/2-visualTime*1.2;arrow(player.x+Math.cos(a)*CIRCLE_R,player.y+Math.sin(a)*CIRCLE_R,a-Math.PI/2,C.ink,7);}
+      text('C',player.x+CIRCLE_R*.72+6,player.y-CIRCLE_R*.72-4,14,C.ink,'left','math');ctx.restore();
+    }
+    if(player.proj){
+      // Projection onto the x-axis: hatched horizontally, because that is all that survives.
+      const x0=player.x-70,y0=player.y-190;
+      ctx.save();ctx.globalAlpha=.1;ctx.fillStyle=C.sepia;ctx.fillRect(x0,y0,140,184);ctx.globalAlpha=.35;ctx.strokeStyle=C.sepia;ctx.lineWidth=1;ctx.beginPath();
+      for(let y=y0+8;y<y0+184;y+=12){ctx.moveTo(x0+4,y);ctx.lineTo(x0+136,y);}
+      ctx.stroke();ctx.globalAlpha=.8;ctx.setLineDash([6,4]);ctx.strokeRect(x0,y0,140,184);ctx.setLineDash([]);ctx.restore();
+      text('P = [1 0; 0 0]',player.x,y0-6,12,C.sepia,'center','math');
+    }
     if(!player.paint)return;
     ctx.save();ctx.setLineDash([7,4]);line(player.x,player.y-18,player.x,player.paintY,C.red,1.2);ctx.setLineDash([]);
     const L=player.lock;
@@ -809,6 +1603,23 @@
       const r=36-18*player.lockT,c=8;ctx.strokeStyle=C.red;ctx.lineWidth=player.lockT>=1?2.2:1.4;ctx.beginPath();
       for(const [sx,sy] of [[-1,-1],[1,-1],[1,1],[-1,1]]){ctx.moveTo(L.x+sx*r,L.y+sy*(r-c));ctx.lineTo(L.x+sx*r,L.y+sy*r);ctx.lineTo(L.x+sx*(r-c),L.y+sy*r);}
       ctx.stroke();if(player.lockT>=1)text('∇f',L.x+r+4,L.y-r+4,13,C.red,'left','math');
+    }
+    ctx.restore();
+  }
+  function drawLoop(){
+    ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+    if(loop.n>1){
+      ctx.strokeStyle=C.ink;ctx.lineWidth=1.6;ctx.globalAlpha=.75;ctx.beginPath();ctx.moveTo(loop.xs[0],loop.ys[0]);
+      for(let k=1;k<loop.n;k++)ctx.lineTo(loop.xs[k],loop.ys[k]);
+      ctx.lineTo(player.x,player.y);ctx.stroke();ctx.globalAlpha=1;
+      ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(loop.xs[0],loop.ys[0],2.5,0,TAU);ctx.fill();
+    }
+    if(loop.flash>0&&loop.fn>2){
+      const a=Math.min(1,loop.flash*2);ctx.globalAlpha=.4*a;ctx.fillStyle=C.yellow;ctx.beginPath();ctx.moveTo(loop.fx[0],loop.fy[0]);
+      for(let k=1;k<loop.fn;k++)ctx.lineTo(loop.fx[k],loop.fy[k]);
+      ctx.closePath();ctx.fill();ctx.globalAlpha=a;ctx.strokeStyle=C.red;ctx.lineWidth=2;ctx.stroke();
+      ctx.lineWidth=4;ctx.strokeStyle=C.paper;ctx.font=`italic 15px ${FONTS.math}`;ctx.textAlign='center';ctx.fillStyle=C.red;
+      loop.text.split('\n').forEach((row,k)=>{const y=loop.cy+k*19;ctx.strokeText(row,loop.cx,y);ctx.fillText(row,loop.cx,y);});
     }
     ctx.restore();
   }
@@ -825,15 +1636,19 @@
       ctx.restore();
     }
   }
+  const SHOT_COLORS=[[O.D,C.blue],[O.G,C.green],[O.INV,C.sepia],[O.FT,C.teal],[O.E,C.violet]];
   function drawShots(){
     ctx.save();ctx.lineCap='round';
     // Our own needles stay half-transparent so they never read as enemy fire.
     ctx.globalAlpha=.55;
-    for(const [op,color] of [[0,C.blue],[2,C.green]]){
+    for(const [op,color] of SHOT_COLORS){
       ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.beginPath();
       for(let i=0;i<shots.count;i++){const s=shots.items[i];if(s.kind!==0||s.op!==op)continue;const dx=Math.cos(s.angle),dy=Math.sin(s.angle);ctx.moveTo(s.x-dx*14,s.y-dy*14);ctx.lineTo(s.x,s.y);}
       ctx.stroke();
     }
+    ctx.strokeStyle=C.teal;ctx.lineWidth=2.6;ctx.beginPath();
+    for(let i=0;i<shots.count;i++){const s=shots.items[i];if(s.kind!==4)continue;ctx.moveTo(s.px,s.py);ctx.lineTo(s.x,s.y);}
+    ctx.stroke();
     ctx.globalAlpha=1;ctx.lineJoin='round';
     for(let i=0;i<shots.count;i++){
       const s=shots.items[i];if(s.kind!==1)continue;
@@ -852,15 +1667,16 @@
     }
     ctx.restore();
   }
-  const bulletColors=[C.blue,C.red,C.green,C.violet,C.orange];
+  const bulletColors=[C.blue,C.red,C.green,C.violet,C.orange,C.teal,C.sepia];
+  const TAILED=[false,false,false,true,true,false,false,false,false,true,false,true];
   function drawBullets(){
     // Batch geometry by colour: one fill and one ink outline pass per colour.
     ctx.save();ctx.lineCap='round';
     for(const color of bulletColors){
       ctx.strokeStyle=color;ctx.lineWidth=2;ctx.globalAlpha=.45;ctx.beginPath();
       for(let i=0;i<bullets.count;i++){
-        const b=bullets.items[i];if(b.color!==color||(b.kind!==3&&b.kind!==4))continue;
-        const tail=b.kind===3?14:clamp(b.speed*Math.min(5,Math.exp(1.25*b.age))*.07,4,30);
+        const b=bullets.items[i];if(b.color!==color||!TAILED[b.kind])continue;
+        const tail=b.kind===4?clamp(b.speed*Math.min(5,Math.exp(1.25*b.age))*.07,4,30):14;
         ctx.moveTo(b.x-Math.cos(b.angle)*tail,b.y-Math.sin(b.angle)*tail);ctx.lineTo(b.x,b.y);
       }
       ctx.stroke();ctx.globalAlpha=1;
@@ -872,11 +1688,11 @@
       ctx.strokeStyle=C.ink;ctx.lineWidth=9;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=6;ctx.stroke();
     }
     ctx.fillStyle='#ffffffd0';ctx.beginPath();
-    for(let i=0;i<bullets.count;i++){const b=bullets.items[i];if(b.kind===2||b.q)continue;const r=Math.max(1,b.radius*.38);ctx.moveTo(b.x-.6+r,b.y-.7);ctx.arc(b.x-.6,b.y-.7,r,0,TAU);}ctx.fill();
+    for(let i=0;i<bullets.count;i++){const b=bullets.items[i];if(b.kind===2||b.q&&b.kind===3)continue;const r=Math.max(1,b.radius*.38);ctx.moveTo(b.x-.6+r,b.y-.7);ctx.arc(b.x-.6,b.y-.7,r,0,TAU);}ctx.fill();
     ctx.strokeStyle=C.white;ctx.lineWidth=2;ctx.beginPath();
     for(let i=0;i<bullets.count;i++){const b=bullets.items[i];if(b.kind!==2)continue;ctx.moveTo(b.x-Math.cos(b.angle)*b.length,b.y-Math.sin(b.angle)*b.length);ctx.lineTo(b.x,b.y);}ctx.stroke();
     ctx.lineWidth=1.1;ctx.beginPath();
-    for(let i=0;i<bullets.count;i++){const b=bullets.items[i];if(!b.q)continue;ctx.moveTo(b.x-2,b.y);ctx.lineTo(b.x+2,b.y);if(b.q>0){ctx.moveTo(b.x,b.y-2);ctx.lineTo(b.x,b.y+2);}}ctx.stroke();
+    for(let i=0;i<bullets.count;i++){const b=bullets.items[i];if(b.kind!==3||!b.q)continue;ctx.moveTo(b.x-2,b.y);ctx.lineTo(b.x+2,b.y);if(b.q>0){ctx.moveTo(b.x,b.y-2);ctx.lineTo(b.x,b.y+2);}}ctx.stroke();
     ctx.restore();
   }
   function drawParticles(){
@@ -910,7 +1726,7 @@
     ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,43.5);ctx.lineTo(x1,43.5);
     for(let i=0;i<=50;i++){const x=x0+i*10+.5,h=i%10===0?9:i%5===0?6:3;ctx.moveTo(x,43.5);ctx.lineTo(x,43.5-h);}
     ctx.stroke();
-    if(!field&&game.phase<2)for(let q=1;q<4;q++)arrow(x0+(x1-x0)*q/4,46,-Math.PI/2,C.red,5);
+    if(!field&&s.bodies.length===4)for(let q=1;q<4;q++)arrow(x0+(x1-x0)*q/4,46,-Math.PI/2,C.red,5);
     text(String(Math.ceil(game.remaining)).padStart(2,'0'),582,42,26,game.remaining<10?C.red:C.ink,'right','mono');
   }
   function hr(y){line(616,y+.5,784,y+.5,'#b3ac9c',1);}
@@ -924,74 +1740,82 @@
     for(let k=0;k<=24;k++){const u=k/24;if(k)ctx.lineTo(x0+u*span,curve(u));else ctx.moveTo(x0,curve(0));}
     ctx.stroke();line(x0,y+h+.5,x+w,y+h+.5,C.ink,1);text('∫',x+2,y+h-1,22,C.ink,'left','math');
   }
+  // Fit text into a column by measuring once and shrinking the font, never by squashing glyphs.
+  function fitText(str,x,y,size,max,color,align='left',font='sans',bold=false){
+    ctx.font=`${font==='math'?'italic ':''}${bold?'700 ':''}${size}px ${FONTS[font]}`;
+    const w=ctx.measureText(str).width;text(str,x,y,w>max?Math.max(7,size*max/w):size,color,align,font,bold);
+  }
   function drawPanel(){
     const field=game.segment==='field',s=field?fields[game.phase]:spells[game.phase],X=618,setting=difficulties[game.difficulty];
     ctx.fillStyle=C.panel;ctx.fillRect(600,0,200,H);line(601,0,601,H,C.ink,2);
-    text('수리결계',X,34,18,C.ink,'left','serif',true);
-    text(`${setting.name} · ${game.runMode==='continue'?'이어하기':'3기 끝'}`,X,53,10,C.pencil);hr(66);
-    text('점수',X,88,10,C.pencil);text(String(game.score).padStart(9,'0'),784,110,21,C.ink,'right','mono');
-    text('최고',X,132,10,C.pencil);text(String(Math.max(game.high,game.score)).padStart(9,'0'),784,132,12,C.pencil,'right','mono');hr(144);
-    text('잔기',X,167,11);
-    for(let i=0;i<3;i++){const x=778-(2-i)*17;ctx.beginPath();ctx.arc(x,163,5,0,TAU);if(i<game.lives){ctx.fillStyle=C.red;ctx.fill();}circle(x,163,5,C.ink,1.2);}
-    text('봄 · X',X,191,11);
-    for(let i=0;i<setting.bombs;i++){const x=774-(setting.bombs-1-i)*15;if(i<game.bombs){ctx.fillStyle=C.ink;ctx.fillRect(x,182,9,9);}else{ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.strokeRect(x+.5,182.5,8,8);}}
-    text('그레이즈',X,215,11);text(String(game.graze),784,215,13,C.ink,'right','mono');
-    drawIntegral(X,224,166,26,game.integral/GRAZE_SHIELD_TARGET);
-    text(`${game.integral} / ${GRAZE_SHIELD_TARGET} — 다 차면 방어막`,X,266,9,C.pencil);hr(276);
-    text('장비',X,297,11,C.ink,'left','sans',true);text('C로 교체',X+30,297,10,C.pencil);text(player.focus?'저속':'고속',784,297,10,player.focus?C.red:C.pencil,'right','sans',true);
-    for(let k=0;k<3;k++){
-      const y=322+k*30,on=player.weapon===k,op=OPS[k];
-      if(on){ctx.save();ctx.globalAlpha=.5;ctx.fillStyle=C.yellow;ctx.fillRect(X-4,y-14,170,27);ctx.restore();}
-      text(op.sym,X+18,y+4,k===2?17:14,on?C.ink:C.pencil,'center','math');
-      if(on){ctx.strokeStyle=C.red;ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(X+18,y-1,21,12,-.1,.35,TAU+.1);ctx.stroke();}
-      text(op.name,X+46,y-2,11,on?C.ink:C.pencil,'left','sans',on);
-      text(player.focus?op.focus:op.fast,X+46,y+10,9,C.pencil);
+    text('수리결계',X,32,18,C.ink,'left','serif',true);
+    text(`${setting.name} · ${game.runMode==='continue'?'이어하기':'3기 끝'}${game.practice?' · 연습':''}`,X,50,10,C.pencil);hr(60);
+    text('점수',X,78,10,C.pencil);text(String(game.score).padStart(9,'0'),784,100,21,C.ink,'right','mono');
+    text('최고',X,118,10,C.pencil);text(String(Math.max(game.high,game.practice?0:game.score)).padStart(9,'0'),784,118,12,C.pencil,'right','mono');hr(128);
+    text('잔기',X,148,11);
+    for(let i=0;i<3;i++){const x=778-(2-i)*17;ctx.beginPath();ctx.arc(x,144,5,0,TAU);if(i<game.lives){ctx.fillStyle=C.red;ctx.fill();}circle(x,144,5,C.ink,1.2);}
+    text('봄 · X',X,169,11);
+    for(let i=0;i<setting.bombs;i++){const x=774-(setting.bombs-1-i)*15;if(i<game.bombs){ctx.fillStyle=C.ink;ctx.fillRect(x,160,9,9);}else{ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.strokeRect(x+.5,160.5,8,8);}}
+    text('그레이즈',X,190,11);text(String(game.graze),784,190,13,C.ink,'right','mono');
+    drawIntegral(X,197,166,22,game.integral/GRAZE_SHIELD_TARGET);
+    text(`${game.integral} / ${GRAZE_SHIELD_TARGET} — 다 차면 방어막`,X,234,9,C.pencil);hr(242);
+    text('장비',X,260,11,C.ink,'left','sans',true);text('C · 1–7',X+30,260,10,C.pencil);text(player.focus?'저속':'고속',784,260,10,player.focus?C.red:C.pencil,'right','sans',true);
+    for(let k=0;k<OPS.length;k++){
+      const y=281+k*23,on=player.weapon===k,op=OPS[k],open=available(k);
+      if(on){ctx.save();ctx.globalAlpha=.5;ctx.fillStyle=C.yellow;ctx.fillRect(X-4,y-12,170,22);ctx.restore();}
+      text(op.sym,X+16,y+4,k===2||k===3?16:k===0||k===1?12:14,on?C.ink:open?C.pencil:'#b3ac9c','center','math');
+      if(on){ctx.strokeStyle=C.red;ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(X+16,y-1,19,10,-.1,.35,TAU+.1);ctx.stroke();}
+      if(!open){text(`${op.unlock+1}단원에서`,X+42,y+3,9.5,'#a39d90');continue;}
+      text(op.name,X+42,y-1,10.5,on?C.ink:C.pencil,'left','sans',on);
+      text(player.focus?op.focus:op.fast,X+42,y+9,8.5,C.pencil);
       if(k===1){
         ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.strokeRect(746.5,y-9.5,37,6);ctx.fillStyle=player.overheat>0?C.red:C.orange;ctx.fillRect(747,y-9,36*player.heat,5);
         if(player.overheat>0)text('과열',784,y+9,9,C.red,'right','sans',true);
       }else if(k===2){
         const ready=player.homingCd<=0,f=1-player.homingCd/HOMING_COOLDOWN;
-        ctx.fillStyle=ready?C.green:'#77736b55';ctx.beginPath();ctx.moveTo(775,y-4);ctx.arc(775,y-4,7,-Math.PI/2,-Math.PI/2+TAU*f);ctx.closePath();ctx.fill();circle(775,y-4,7,C.ink,1);
-        if(!ready)text(player.homingCd.toFixed(1),784,y+11,9,C.pencil,'right','mono');
+        ctx.fillStyle=ready?C.green:'#77736b55';ctx.beginPath();ctx.moveTo(776,y-3);ctx.arc(776,y-3,6.5,-Math.PI/2,-Math.PI/2+TAU*f);ctx.closePath();ctx.fill();circle(776,y-3,6.5,C.ink,1);
+        if(!ready)text(player.homingCd.toFixed(1),784,y+10,8.5,C.pencil,'right','mono');
+      }else if(k===4){
+        ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.strokeRect(746.5,y-9.5,37,6);ctx.fillStyle=player.plock?C.red:C.sepia;ctx.fillRect(747,y-9,36*player.pgauge,5);
+        if(player.plock)text('충전',784,y+9,9,C.red,'right','sans',true);
       }
     }
-    hr(412);
-    text('연산표',X,431,11,C.ink,'left','sans',true);
-    const cols=[674,722,766];
-    OPS.forEach((op,k)=>text(op.sym,cols[k],449,k===2?13:11,C.pencil,'center','math'));
-    text('xⁿ',X+2,468,14,C.blue,'left','math');text('eˣ',X+2,487,14,C.red,'left','math');
-    ['차수−1','→ 0','차수−1'].forEach((v,k)=>text(v,cols[k],467,10,C.ink,'center'));
-    ['무효','→ 0','무효'].forEach((v,k)=>text(v,cols[k],486,10,k===1?C.ink:C.red,'center','sans',k!==1));
-    hr(498);
-    text(`${field?'필드':'보스'} ${game.phase+1}/3 · ${s.label}`,X,518,10,s.color,'left','sans',true);
-    text(s.formula,700,544,s.formula.length>16?13:15,C.ink,'center','math');
-    text(s.sub,700,562,9,C.pencil,'center','mono');hr(574);
-    text(player.shield>0?`∫ 방어막  ${Math.ceil(player.shieldTime)}초`:'∫ 방어막  없음',X,594,11,player.shield?C.green:C.pencil);
-    text(player.lance>0?`d² 이계미분 창  ${Math.ceil(player.lance)}초`:'d² 이계미분 창  없음',X,614,11,player.lance?C.orange:C.pencil);
-    text(game.freezeCooldown<=0?'V 정지점  준비':`V 정지점  ${Math.ceil(game.freezeCooldown)}초`,X,634,11,game.freezeCooldown<=0?C.blue:C.pencil);hr(646);
-    text(game.mode==='playing'?'푸는 중':game.mode==='paused'?'일시정지':game.mode==='clear'?'다 풀었음':game.mode==='continue'?'이어하기 대기':game.mode==='over'?'오답':'대기',X,668,10,C.ink);
-    text(`${Math.round(game.fps)} fps`,784,668,9,C.pencil,'right','mono');
-    text(`이어하기 ${game.continues}회 · 소리 ${game.muted?'끔':'켬'} (M)`,X,688,9,C.pencil);
+    hr(436);
+    text('약점',X,454,11,C.ink,'left','sans',true);text(field?'이 필드의 적':'이 보스',X+30,454,10,C.pencil);
+    s.hints.slice(0,4).forEach(([who,what],j)=>{const y=472+j*17;fitText(who,X,y,12,62,s.color,'left','math');fitText(what,X+66,y,9.5,100,C.ink);});
+    hr(540);
+    text(`${field?'필드':'보스'} ${game.phase+1}/${spells.length} · ${s.label}`,X,558,10,s.color,'left','sans',true);
+    fitText(s.formula,700,580,14,166,C.ink,'center','math');
+    fitText(s.sub,700,596,9,166,C.pencil,'center','mono');hr(606);
+    text(player.shield>0?`∫ 방어막  ${Math.ceil(player.shieldTime)}초`:'∫ 방어막  없음',X,624,11,player.shield?C.green:C.pencil);
+    text(player.lance>0?`d² 이계미분 창  ${Math.ceil(player.lance)}초`:'d² 이계미분 창  없음',X,640,11,player.lance?C.orange:C.pencil);
+    text(game.freezeCooldown<=0?'V 정지점  준비':`V 정지점  ${Math.ceil(game.freezeCooldown)}초`,X,656,11,game.freezeCooldown<=0?C.blue:C.pencil);hr(666);
+    text(game.mode==='playing'?'푸는 중':game.mode==='paused'?'일시정지':game.mode==='clear'?'다 풀었음':game.mode==='continue'?'이어하기 대기':game.mode==='over'?'오답':'대기',X,682,10,C.ink);
+    text(`${Math.round(game.fps)} fps`,784,682,9,C.pencil,'right','mono');
+    text(`이어하기 ${game.continues}회 · 소리 ${game.muted?'끔':'켬'} (M)`,X,696,9,C.pencil);
   }
   function drawBanner(){
     if(game.banner<=0)return;const field=game.segment==='field',s=field?fields[game.phase]:spells[game.phase],duration=field?3.2:3.8,age=duration-game.banner;
     const offset=age<.65?(1-ease(age/.65))*800:game.banner<.6?(1-ease(game.banner/.6))*800:0;
     ctx.save();ctx.beginPath();ctx.rect(0,0,800,H);ctx.clip();ctx.translate(offset,0);
-    ctx.fillStyle=C.white;ctx.fillRect(316,76,468,94);ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;ctx.strokeRect(316.5,76.5,467,93);ctx.fillStyle=s.color;ctx.fillRect(317,77,5,92);
+    ctx.fillStyle=C.white;ctx.fillRect(316,76,468,94);sketchRect(316.5,76.5,467,93,game.phase*3+(field?1:2));ctx.fillStyle=s.color;ctx.fillRect(317,77,5,92);
     ctx.save();ctx.translate(340,76);ctx.rotate(-.2);ctx.fillStyle='#e6d9aecc';ctx.fillRect(-24,-8,50,16);ctx.restore();
     text(`문제 ${game.phase+1}${field?'':' · 보스'}`,766,100,11,s.color,'right','sans',true);
-    text(`${s.label} 「${s.title}」`,766,130,!field&&game.phase===2?17:20,C.ink,'right','serif',true);
-    text(s.formula,766,156,15,s.color,'right','math');ctx.restore();
+    fitText(`${s.label} 「${s.title}」`,766,130,20,420,C.ink,'right','serif',true);
+    if(field&&game.newTool>=0){const op=OPS[game.newTool];text(`새 연산자  ${op.sym}  ${op.name} · ${game.newTool+1}번`,336,160,11,C.red,'left','sans',true);fitText(s.formula,766,156,15,200,s.color,'right','math');}
+    else fitText(s.formula,766,156,15,420,s.color,'right','math');
+    ctx.restore();
   }
   function render(){
-    ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;drawBackground();
+    ctx.setTransform(scale,0,0,scale,0,0);ctx.globalAlpha=1;drawBackground();
     ctx.save();ctx.beginPath();ctx.rect(0,56,W,H-56);ctx.clip();
     if(game.shake>0&&game.mode==='playing')ctx.translate(Math.sin(visualTime*97)*game.shake*14,Math.cos(visualTime*83)*game.shake*14);
-    if(game.segment==='field'){drawFieldMath();drawEnemies();}else if(game.mode!=='clear')drawBoss();
-    drawWarnings();drawBeams();drawShots();drawPlayer();drawBullets();drawItems();drawParticles();drawLabels();drawFreeze();drawBomb();
+    if(game.segment==='field'){drawFieldMath();drawEnemies();}
+    else if(game.mode!=='clear'){if(game.phase===6)drawConcentration();drawBoss();}
+    drawWarnings();drawLoop();drawBeams();drawShots();drawPlayer();drawBullets();drawItems();drawParticles();drawLabels();drawFreeze();drawBomb();
     if(game.itemToast>0&&game.mode==='playing'){
       ctx.save();ctx.globalAlpha=Math.min(1,game.itemToast);ctx.font=`12px ${FONTS.sans}`;const w=ctx.measureText(game.itemName).width+28;
-      ctx.fillStyle=C.white;ctx.fillRect(300-w/2,604,w,32);ctx.strokeStyle=C.ink;ctx.lineWidth=1.2;ctx.strokeRect(300.5-w/2,604.5,w-1,31);
+      ctx.fillStyle=C.white;ctx.fillRect(300-w/2,604,w,32);sketchRect(300.5-w/2,604.5,w-1,31,game.itemName.length);
       text(game.itemName,300,625,12,C.ink,'center');ctx.restore();
     }
     if(game.flash>0&&game.mode==='playing'){ctx.fillStyle=`rgba(255,255,255,${game.flash*.7})`;ctx.fillRect(0,0,W,H);}
