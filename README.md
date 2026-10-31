@@ -17,7 +17,7 @@
 ## 고치기
 
 - 이름과 대사: `story.js`
-- 그림: `figures/`(대화 초상)와 `figures_tanmak/`(탄막 화면)에 같은 이름으로. 규격은 [docs/art-brief.md](docs/art-brief.md)
+- 그림: `figures/`와 `figures_tanmak/`에 같은 이름으로. 규격은 [docs/art-brief.md](docs/art-brief.md)
 - 테스트: `node tests/verify.cjs`
 
 ## 피드백
@@ -31,3 +31,37 @@
 탄막 슈팅이라는 장르만 같은 독립 창작물입니다. 「동방 프로젝트」의 2차 창작이 아니며, 그 캐릭터·이름·음악·이야기·그림을 쓰지 않았고, ZUN 및 上海アリス幻樂団(Team Shanghai Alice)과 관계가 없습니다.
 
 An original bullet-hell game. Not a Touhou Project fan work, and not affiliated with or endorsed by ZUN or Team Shanghai Alice.
+
+---
+
+## English
+
+A bullet-hell shooter where you fire operators at functions to reduce them to zero. It features seven math chapters, plus EX1, where space bends, and EX2, where you fight with physical tools.
+
+### Play
+
+Open `index.html` in a browser. No server is required. The guide below the game explains the rules in more detail.
+
+| Key | Action |
+| --- | --- |
+| Arrow keys / Shift | Move / focus for slower movement |
+| Z | Shoot / advance dialogue |
+| C, 1–8 | Switch equipment (with ∮ equipped, press 4 again to toggle ver1/ver2) |
+| X / V | Bomb / stationary point and DNA helix |
+| Ctrl / P / M | Skip dialogue / pause / toggle sound |
+
+### Contributing
+
+- Names and dialogue: `story.js`
+- Art: use matching filenames in `figures/` and `figures_tanmak/`. See [docs/art-brief.md](docs/art-brief.md) for specifications.
+- Tests: `node tests/verify.cjs`
+
+### Feedback
+
+Bug reports, ideas, and pull requests are welcome. Feel free to open an issue or pull request.
+
+### License
+
+[MIT](LICENSE)
+
+This is an original work in the bullet-hell genre. It is not a Touhou Project fan work. It does not use Touhou characters, names, music, stories, or art, and it is not affiliated with ZUN or Team Shanghai Alice.
