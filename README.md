@@ -32,6 +32,10 @@
 
 An original bullet-hell game. Not a Touhou Project fan work, and not affiliated with or endorsed by ZUN or Team Shanghai Alice.
 
+## Misc
+
+아직 음악이 없습니다. 음악 제공도 언제나 환영입니다. 그전까지는 동방프로젝트 음악을 유튜브로 틀고 플레이 하시는 것을 권장드립니다.
+
 ---
 
 ## English
